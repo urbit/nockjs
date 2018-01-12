@@ -126,12 +126,14 @@ Atom.prototype.calculateMug = function() {
 	}
 };
 
-function i(num) {
-	return new Atom(new BigInteger(num.toString()));
-}
-
 function s(str) {
 	return new Atom(new BigInteger(str));
+}
+
+function i(num) {
+  var bi = new BigInteger();
+  bi.fromInt(num);
+  return new Atom(bi);
 }
 
 function m(str) {
