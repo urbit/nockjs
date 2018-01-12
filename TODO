@@ -1,0 +1,26 @@
+* a noun is an atom or a cell. DONE
+* mugs. DONE
+* unifying equals. DONE
+* dorky embedded DSL for nouns. DONE
+* some kind of real hashmap (needed for memoization at least)
+* nock->js compiler (THE REALLY INTERESTING PART)
+* decrement
+* add
+* ackerman
+* atom-gates.pill
+* ALL jets (ref: jaque)
+* boot ivory pill
+^--- call urbit library functions from js! great success!
+* boot fakezod (brass pill) to dojo
+* prevalence (on-disk in node, IndexedDB in brower)
+* expose basic vere-slave interface as a library
+  i.e. send me pokes, i handle all persistence and send you io 
+^--- candidate vere backend
+     urbit in the browser
+
+At this point, we have a working vere backend, as well as a full
+"urbit in the browser".  Performance is unlikely to be as good as jaque,
+but will likely be quite accepatable (especially for in-browser things).
+
+At the very least, using an ivory pill to compile and run hoon from the
+browser will ease client-side programming tasks.

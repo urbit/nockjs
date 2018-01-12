@@ -1,109 +1,3 @@
-var BigInteger = require('jsbn').BigInteger;
-
-function Noun() {
-  this._mug = 0;
-}
-
-Noun.prototype.mug = function () {
-  if ( 0 === this._mug ) {
-    this._mug = this.calculateMug();
-  }
-  return this._mug;
-};
-
-Noun.prototype.mugged = function () {
-  return 0 === this._mug;
-};
-
-Noun.prototype.calculateMug = function() {
-  // XX: TODO (different for atoms and cells)
-  return Math.floor(Math.random());
-};
-
-Noun.prototype.equals = function(o) {
-  if ( this instanceof Cell ) {
-    if ( o instanceof Cell) {
-      return this.unify(b);
-    }
-    else {
-      return false;
-    }
-  }
-  else {
-    if ( o instanceof Cell ) {
-      return false;
-    }
-    else if (0 === this.number.compareTo(o.number)) {
-      o.number = this.number;
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}
-
-function Atom(number) {
-  Noun.call(this);
-  this.number = number;
-}
-
-/*
-Atom.prototype.toJs = function() {
-  var str = this.number.toString();
-  var inside = ( this.number.bitLength() < 32 ) ? str : ('"' + str + '"');
-  return "new BigInteger(" + inside + ")";
-};
-*/
-
-Atom.prototype.valueOf = function() {
-  return this.number.bitLength <= 32
-    ? this.number.intValue()
-    : this.number.toString();
-}
-
-Atom.prototype.yes = new Atom(new BigInteger(0));
-Atom.prototype.no  = new Atom(new BigInteger(1));
-
-function Cell(head, tail) {
-  Noun.call(this);
-  this.head = head;
-  this.tail = tail;
-}
-
-/*
-Cell.prototype.toJs = function() {
-  return "new Cell(" + this.head.toJs() + ", " + this.tail.toJs() + ")";
-}
-*/
-
-Cell.prototype.unify = function(o) {
-  if ( this === o ) {
-    return true;
-  }
-
-  if ( o.mugged() ) {
-    if ( this.mugged() ) {
-      if ( this.mug() != o.mug() ) {
-        return false;
-      }
-    }
-    else {
-      return o.unify(this);
-    }
-  }
-
-  if ( this.head.equals(o.head) ) {
-    o.head = this.head;
-    if ( this.tail.equals(o.tail) ) {
-      o.tail = this.tail;
-      return true;
-    }
-  }
-
-  return false;
-};
-
 function Statement() {
 }
 
@@ -130,7 +24,7 @@ function Expression() {
 }
 
 Expression.prototype.toJs = function() {
-  throw new Exception("not implemented");
+  throw new Error("not implemented");
 };
 
 function Cons(head, tail) {
@@ -162,7 +56,7 @@ function Bail() {
 }
 
 Bail.prototype.toJs = function() {
-  return "throw new Exception(\"Bail\")";
+  return "throw new Error(\"Bail\")";
 };
 
 function Identity(name) {
@@ -232,7 +126,7 @@ If.prototype.toJs = function() {
   return "switch(" + this.test + "){" +
          "case 0:" + this.yes.toJs() + "break;" +
          "case 1:" + this.no.toJs() + "break; " +
-         "default:throw new Exception(\"Bail\");}";
+         "default:throw new Error(\"Bail\");}";
 };
 
 function Kick(axis, core) {
@@ -260,7 +154,7 @@ Kick.prototype.toJs = function() {
 function compile(formula, subject, product, fresh, constants, block) {
   var op, arg, one, two, odd;
   if ( !(formula instanceof Cell )) {
-    throw new Exception("invalid formula");
+    throw new Error("invalid formula");
   }
   op = formula.head;
   arg = formula.tail;
@@ -397,7 +291,7 @@ function compile(formula, subject, product, fresh, constants, block) {
       block.append(new Assignment(product, new Esc(one, two)));
       break;
     default:
-      throw new Exception("invalid formula");
+      throw new Error("invalid formula");
   }
 }
 
@@ -414,7 +308,7 @@ function Formula(cell) {
 }
 
 Noun.prototype.formulate = function() {
-  throw new Exception("formulas must be cells");
+  throw new Error("formulas must be cells");
 };
 Cell.prototype.formulate = function() {
   return new Formula(this);
