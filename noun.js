@@ -4,6 +4,10 @@ function Noun() {
   this._mug = 0;
 }
 
+Noun.prototype.loob = function () {
+  throw new Error("Bail");
+};
+
 Noun.prototype.mug = function () {
   if ( 0 === this._mug ) {
     this._mug = this.calculateMug();
@@ -14,6 +18,8 @@ Noun.prototype.mug = function () {
 Noun.prototype.mugged = function () {
   return 0 !== this._mug;
 };
+
+Noun.prototype.deep = false;
 
 Noun.prototype.equals = function(o) {
   if ( this === o ) {
@@ -70,6 +76,7 @@ function Cell(head, tail) {
 }
 Cell.prototype = Object.create(Noun.prototype);
 Cell.prototype.constructor = Cell;
+Cell.prototype.deep = true;
 
 Cell.prototype.calculateMug = function() {
   return _mug_both(this.head.mug(), this.tail.mug());
@@ -110,6 +117,50 @@ function Atom(number) {
 Atom.prototype = Object.create(Noun.prototype);
 Atom.prototype.constructor = Atom;
 
+Atom.prototype.loob = function() {
+  switch ( this.number.intValue() ) {
+    case 0:
+      return true;
+    case 1:
+      return false;
+    default:
+      throw new Error("Bail");
+  }
+};
+
+var ida  = i(1);
+var heda = i(2);
+var tala = i(3);
+
+Atom.prototype.cap = function() {
+  switch (this.number.intValue()) {
+    case 0:
+    case 1:
+      throw new Error("Bail");
+    default:
+    return this.number.testBit(this.number.bitLength() - 2) ? tala : heda;
+  }
+};
+
+Atom.prototype.mas = function() {
+  switch (this.number.intValue()) {
+    case 0:
+    case 1:
+      throw new Error("Bail");
+    case 2:
+    case 3:
+      return ida;
+    default:
+      var n = this.number;
+      var l = n.bitLength() - 2;
+      var addTop = new BigInteger();
+      addTop.fromInt(1 << l);
+      var mask = new BigInteger();
+      mask.fromInt((1 << l)-1);
+      return new Atom(n.and(mask).xor(addTop));
+  }
+};
+
 Atom.prototype.calculateMug = function() {
 	var a = this.number.toByteArray();
 	var b, c, d, e, f, bot;
@@ -124,6 +175,10 @@ Atom.prototype.calculateMug = function() {
       return f;
     }
 	}
+};
+
+Atom.prototype.shortCode = function() {
+  return this.number.toString(36); // max supported by BigInteger
 };
 
 function s(str) {

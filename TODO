@@ -2,7 +2,7 @@
 * mugs. DONE
 * unifying equals. DONE
 * dorky embedded DSL for nouns. DONE
-* some kind of real hashmap (needed for memoization at least)
+* some kind of real hashmap (needed for memoization at least). DONE
 * nock->js compiler (THE REALLY INTERESTING PART)
 * decrement
 * add
