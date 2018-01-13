@@ -24,27 +24,28 @@ Node.prototype.insert = function(key, val, lef, rem) {
   var bit, map, inx;
   lef -= 5;
   bit = rem >>> lef;
-  rem = rem & ((1 << lef) - 1);
-  inx = popcnt(map & ((1 << bit) - 1));
+  rem &= ((1 << lef) - 1);
+  inx = popcnt(this.map & ((1 << bit) - 1));
   
-  if ( map & (1 << bit) ) {
+  if ( this.map & (1 << bit) ) {
     this.slots[inx] = this.slots[inx].insert(key, val, lef, rem);
   }
   else {
+    this.map |= 1 << bit;
     this.slots.splice(inx, 0, new Single(key, val));
   }
   return this;
 };
 
 Node.prototype.get = function(key, lef, rem) {
-  var bit, map, inx;
+  var bit, inx;
   lef -= 5;
   bit = rem >>> lef;
   rem = rem & ((1 << lef) - 1);
-  inx = popcnt(map & ((1 << bit) - 1));
+  inx = popcnt(this.map & ((1 << bit) - 1));
 
-  if ( map & (1 << bit) ) {
-    this.slots[inx].get(key, lef, rem);
+  if ( this.map & (1 << bit) ) {
+    return this.slots[inx].get(key, lef, rem);
   }
   else {
     return null;
@@ -93,15 +94,22 @@ Single.prototype = Object.create(Slot.prototype);
 Single.prototype.constructor = Single;
 
 Single.prototype.insert = function(key, val, lef, rem) {
-  var n;
-  if ( lef > 0 ) {
-    n = new Node();
+  if ( this.key.equals(key) ) {
+    this.val = val;
+    return this;
   }
   else {
-    n = new Bucket();
+    var n;
+    if ( lef > 0 ) {
+      n = new Node();
+    }
+    else {
+      n = new Bucket();
+    }
+    n.insert(this.key, this.val, lef, rem);
+    n.insert(key, val, lef, rem);
+    return n;
   }
-  n.insert(this.key, this.val, lef, rem);
-  return n.insert(key, val, lef, rem);
 };
 
 Single.prototype.get = function(key, lef, rem) {
