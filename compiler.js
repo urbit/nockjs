@@ -184,11 +184,12 @@ Kick.prototype.constructor = Kick;
 
 Kick.prototype.toJs = function() {
   var axis = this.axis.shortCode();
+  console.log("axis: " + this.axis + "shortcode: " + this.axis.shortCode());
 
   return "(function (cor) {" +
            "var pro, tgt, bus, arms, bat = cor.head, has = false;" +
            "if ( bat.hasOwnProperty('arms') ) {" +
-             "arms = bat.arms" +
+             "arms = bat.arms;" +
              "has = arms.hasOwnProperty('" + axis + "');" + 
            "}" +
            "else arms = bat.arms = {};" +
@@ -285,14 +286,14 @@ function compile(formula, subject, product, fresh, constants, block) {
       break;
     case 9:
       odd = arg.head;
-      if ( 2 === odd.cap() ) {
+      if ( 2 === odd.cap().valueOf() ) {
         one = fresh();
         two = odd.mas();
         compile(arg.tail, subject, one, fresh, constants, block);
         block.append(new Assignment(product, new Kick(two, one)));
       }
       else {
-        compile(noun.dwim([7, arg.tail.tail, 2, [0, 1], 0, odd]),
+        compile(noun.dwim([7, arg.tail, 2, [0, 1], 0, odd]),
           subject, product, fresh, constants, block);
       }
       break;
