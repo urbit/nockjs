@@ -120,7 +120,7 @@ Nock.prototype.toJs = function() {
   var f = this.formula;
   var targetCode = "(" + f + ".hasOwnProperty('target') ? " + f + 
     ".target : (" + f + ".target = runtime.compile(" + this.formula + ")))";
-  return tail ?
+  return this.tail ?
     "runtime.trampoline(" + targetCode + ", " + this.subject + ")" :
     targetCode + "(" + this.subject + ")";
 };
@@ -380,7 +380,7 @@ var runtime = {
     var text = "return function(subject){" + body.toJs() + "return product;}";
     console.log(text);
     var builder = new Function("runtime", "constants", text);
-    cell.target = builder(this, constants);
+    return cell.target = builder(this, constants);
   },
   nock: function(subject, formula) {
     var product, target;
@@ -389,7 +389,7 @@ var runtime = {
     }
     target = formula.target;
     while ( true ) {
-      product = formula.target(subject);
+      product = target(subject);
       if ( product instanceof Trampoline ) {
         subject = product.subject;
         target  = product.target;

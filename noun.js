@@ -20,6 +20,9 @@ Noun.prototype.mugged = function () {
 };
 
 Noun.prototype.deep = false;
+Noun.prototype.bump = function () {
+  throw new Error("Bail");
+}
 
 Noun.prototype.equals = function(o) {
   if ( this === o ) {
@@ -126,6 +129,10 @@ Atom.prototype.loob = function() {
     default:
       throw new Error("Bail");
   }
+};
+
+Atom.prototype.bump = function() {
+  return new Atom(this.number.add(BigInteger.ONE));
 };
 
 var ida  = i(1);
