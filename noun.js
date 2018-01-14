@@ -8,6 +8,12 @@ Noun.prototype.loob = function () {
   throw new Error("Bail");
 };
 
+Noun.prototype.toString = function() {
+  var parts = [];
+  this.pretty(parts, false);
+  return parts.join('');
+};
+
 Noun.prototype.mug = function () {
   if ( 0 === this._mug ) {
     this._mug = this.calculateMug();
@@ -81,6 +87,18 @@ Cell.prototype = Object.create(Noun.prototype);
 Cell.prototype.constructor = Cell;
 Cell.prototype.deep = true;
 
+Cell.prototype.pretty = function(out, tail) {
+  if ( !tail ) {
+    out.push('[');
+  }
+  this.head.pretty(out, false);
+  out.push(' ');
+  this.tail.pretty(out, true);
+  if ( !tail ) {
+    out.push(']');
+  }
+};
+
 Cell.prototype.calculateMug = function() {
   return _mug_both(this.head.mug(), this.tail.mug());
 };
@@ -119,6 +137,48 @@ function Atom(number) {
 }
 Atom.prototype = Object.create(Noun.prototype);
 Atom.prototype.constructor = Atom;
+
+var shortBi = new BigInteger();
+shortBi.fromInt(65536);
+
+Atom.prototype.pretty = function(out, tail) {
+  if ( this.number.compareTo(shortBi) < 0 ) {
+    return out.push(this.number.toString(10));
+  }
+  else {
+    var tap = [], isTa = true, isTas = true, bytes = this.number.toByteArray();
+    for ( var i = bytes.length - 1; i >= 0; --i) {
+      var c = bytes[i];
+      if ( isTa && ((c < 32) || (c > 127)) ) {
+        isTa = false;
+        isTas = false;
+        break;
+      }
+      else if ( isTas && !((c > 47 && c < 58) ||  // digits
+                           (c > 96 && c < 123) || // lowercase letters
+                            c === 45) ) {         // -
+        console.log(c + "is not a tas");
+        isTas = false;
+      }
+      else {
+        tap.push(String.fromCharCode(c));
+      }
+    }
+    if ( isTas ) {
+      out.push('%');
+      out.push.apply(out, tap);
+    }
+    else if ( isTa ) {
+      out.push("'");
+      out.push.apply(out, tap);
+      out.push("'");
+    }
+    else {
+      out.push("0x");
+      out.push(this.number.toString(16));
+    }
+  }
+};
 
 Atom.prototype.loob = function() {
   switch ( this.number.intValue() ) {
@@ -206,7 +266,8 @@ function m(str) {
   return new Atom(new BigInteger(octs.join(''), 16))
 }
 
-function dwim(n) {
+function dwim(a) {
+  var n = (arguments.length === 1 ? a : Array.apply(null, arguments));
 	if ( n instanceof Noun ) {
 		return n;
 	}
