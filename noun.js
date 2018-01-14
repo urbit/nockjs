@@ -160,9 +160,7 @@ Atom.prototype.pretty = function(out, tail) {
         console.log(c + "is not a tas");
         isTas = false;
       }
-      else {
-        tap.push(String.fromCharCode(c));
-      }
+      tap.push(String.fromCharCode(c));
     }
     if ( isTas ) {
       out.push('%');
