@@ -48,7 +48,7 @@ Node.prototype.get = function(key, lef, rem) {
     return this.slots[inx].get(key, lef, rem);
   }
   else {
-    return null;
+    return undefined;
   }
 };
 
@@ -82,7 +82,7 @@ Bucket.prototype.get = function(key, lef, rem) {
     }
   }
 
-  return null;
+  return undefined;
 };
 
 function Single(key, val) {
@@ -117,7 +117,7 @@ Single.prototype.get = function(key, lef, rem) {
     return this.val;
   }
   else {
-    return null;
+    return undefined;
   }
 };
 
@@ -129,7 +129,7 @@ NounMap.prototype.insert = function(key, val) {
   var m    = key.mug();
   var inx  = m >>> 25;
   var sot  = this.slots;
-  if ( null == sot[inx] ) {
+  if ( undefined === sot[inx] ) {
     sot[inx] = new Single(key, val);
   }
   else {
@@ -142,8 +142,8 @@ NounMap.prototype.get = function(key) {
   var m = key.mug();
   var inx = m >>> 25;
   var sot = this.slots[inx];
-  if ( null == sot ) {
-    return null;
+  if ( undefined === sot ) {
+    return undefined;
   }
   else {
     var rem  = m & ((1 << 25) - 1);

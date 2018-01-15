@@ -14,8 +14,8 @@ function is(a, b, msg) {
   }
   else {
     tap.fail(msg);
-    tap.comment("got:      " + JSON.stringify(b));
-    tap.comment("expected: " + JSON.stringify(a));
+    tap.comment("got:      " + b.toString());
+    tap.comment("expected: " + a.toString());
     return false;
   }
 }
@@ -33,16 +33,16 @@ function randomAtom() {
   return new noun.Atom.Atom(c);
 }
 
-function randomCell() {
-  return new noun.Cell(randomNoun(), randomNoun());
+function randomCell(depth) {
+  return new noun.Cell(randomNoun(depth+1), randomNoun(depth+1));
 }
 
-function randomNoun() {
-  if (Math.random() > 0.5) {
+function randomNoun(depth) {
+  if ( depth > 10 || Math.random() > 0.5) {
     return randomAtom();
   }
   else {
-    return randomCell();
+    return randomCell(depth);
   }
 }
 
@@ -50,14 +50,14 @@ m.insert(n(42), n(0));
 is(m.get(n(42)), n(0), "42->0");
 
 for ( var i = 0; i < 1000; ++i ) {
-  var key = randomNoun();
-  var one = randomNoun();
-  var two = randomNoun();
+  var key = randomNoun(0);
+  var one = randomNoun(0);
+  var two = randomNoun(0);
   m.insert(key, one);
   var got = m.get(key);
   if ( null == got ) {
     tap.fail(i+"1");
-    tap.comment(JSON.stringify(key));
+    tap.comment(key.toString());
     break;
   }
   else if ( !is(got, one, i+"1") ) {
@@ -67,14 +67,10 @@ for ( var i = 0; i < 1000; ++i ) {
   got = m.get(key);
   if ( null == got ) {
     tap.fail(i+"2");
-    tap.comment(JSON.stringify(key));
+    tap.comment(key.toString());
     break;
   }
   else if ( !is(got, two, i+"2") ) {
     break;
   }
-}
-
-module.exports = {
-  foo: randomNoun
 }

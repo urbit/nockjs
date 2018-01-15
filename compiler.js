@@ -1,8 +1,10 @@
 var noun = require('./noun.js'),
+    NounMap = require('./hamt.js').NounMap,
     Noun = noun.Noun,
     Atom = noun.Atom.Atom,
     Cell = noun.Cell,
     MEMO = noun.dwim("memo"),
+    SLOG = noun.dwim("slog"),
     FAST = noun.dwim("fast"),
     SPOT = noun.dwim("spot"),
     MEAN = noun.dwim("mean"),
@@ -56,7 +58,7 @@ Cons.prototype = Object.create(Expression.prototype);
 Cons.prototype.constructor = Cons;
 
 Cons.prototype.toJs = function() {
-  return "runtime.cons(" + this.head + ", " + this.tail + ")";
+  return "context.cons(" + this.head + ", " + this.tail + ")";
 };
 
 function Frag(axis, name) {
@@ -119,9 +121,9 @@ Nock.prototype.constructor = Nock;
 Nock.prototype.toJs = function() {
   var f = this.formula;
   var targetCode = "(" + f + ".hasOwnProperty('target') ? " + f + 
-    ".target : (" + f + ".target = runtime.compile(" + this.formula + ")))";
+    ".target : (" + f + ".target = context.compile(" + this.formula + ")))";
   return this.tail ?
-    "runtime.trampoline(" + targetCode + ", " + this.subject + ")" :
+    "context.trampoline(" + targetCode + ", " + this.subject + ")" :
     targetCode + "(" + this.subject + ")";
 };
 
@@ -133,7 +135,7 @@ Deep.prototype = Object.create(Expression.prototype);
 Deep.prototype.constructor = Deep;
 
 Deep.prototype.toJs = function() {
-  return this.name +".deep ? runtime.yes : runtime.no";
+  return this.name +".deep ? context.yes : context.no";
 };
 
 function Bump(name) {
@@ -156,7 +158,7 @@ Same.prototype = Object.create(Expression.prototype);
 Same.prototype.constructor = Same;
 
 Same.prototype.toJs = function() {
-  return "(" + this.one + ".equals(" + this.two + ")" + " ? runtime.yes : runtime.no)";
+  return "(" + this.one + ".equals(" + this.two + ")" + " ? context.yes : context.no)";
 };
 
 function If(test, yes, no) {
@@ -184,7 +186,6 @@ Kick.prototype.constructor = Kick;
 
 Kick.prototype.toJs = function() {
   var axis = this.axis.shortCode();
-  console.log("axis: " + this.axis + "shortcode: " + this.axis.shortCode());
 
   return "(function (cor) {" +
            "var pro, tgt, bus, arms, bat = cor.head, has = false;" +
@@ -193,13 +194,13 @@ Kick.prototype.toJs = function() {
              "has = arms.hasOwnProperty('" + axis + "');" + 
            "}" +
            "else arms = bat.arms = {};" +
-           "tgt = has ? arms['" + axis + "'] : (arms['" + axis + "'] = runtime.compile(" + 
+           "tgt = has ? arms['" + axis + "'] : (arms['" + axis + "'] = context.compile(" + 
              new Frag(this.axis, "bat").toJs() + "));" + 
            "bus = cor;" +
-           (this.tail ? "pro = runtime.trampoline(tgt, bus);" :
+           (this.tail ? "pro = context.trampoline(tgt, bus);" :
              "while (true) {" +
                "pro = tgt(bus);" +
-               "if ( runtime.isTrampoline(pro) ) {" +
+               "if ( context.isTrampoline(pro) ) {" +
                  "tgt = pro.target;" +
                  "bus = pro.subject;" +
                "}" +
@@ -207,6 +208,55 @@ Kick.prototype.toJs = function() {
              "}") +
            "return pro;" +
          "})(" + this.core + ")";
+};
+
+function GetMemo(name) {
+  Expression.call(this);
+  this.name = name;
+}
+GetMemo.prototype = Object.create(Expression.prototype);
+GetMemo.prototype.constructor = GetMemo;
+
+GetMemo.prototype.toJs = function() {
+  return "context.getMemo(" + this.name + ")";
+};
+
+function PutMemo(key, val) {
+  Statement.call(this);
+  this.key = key;
+  this.val = val;
+}
+PutMemo.prototype = Object.create(Statement.prototype);
+PutMemo.prototype.constructor = PutMemo;
+
+function Push(name) {
+  Statement.call(this);
+  this.name = name;
+}
+Push.prototype = Object.create(Statement.prototype);
+Push.prototype.constructor = Push;
+
+Push.prototype.toJs = function() {
+  return "context.stackPush(" + this.name + ");";
+};
+
+function Pop() {
+  Statement.call(this);
+}
+Pop.prototype = Object.create(Statement.prototype);
+Pop.prototype.constructor = Pop;
+
+Pop.prototype.toJs = function() {
+  return "context.stackPop()";
+};
+
+function Slog(name) {
+  Statement.call(this);
+  this.name = name;
+}
+
+Slog.prototype.toJs = function() {
+  return "context.slog(" + this.name + ")";
 };
 
 function compile(formula, subject, product, fresh, constants, block) {
@@ -223,7 +273,7 @@ function compile(formula, subject, product, fresh, constants, block) {
     compile(arg, subject, two, fresh, constants, block);
     block.append(new Assignment(product, new Cons(one, two)));
   }
-  else switch ( op.valueOf() ) {
+  else switch ( op.intValue() ) {
     case 0:
       if ( 0 === arg ) {
         block.append(new Bail());
@@ -286,7 +336,7 @@ function compile(formula, subject, product, fresh, constants, block) {
       break;
     case 9:
       odd = arg.head;
-      if ( 2 === odd.cap().valueOf() ) {
+      if ( 2 === odd.cap().intValue() ) {
         one = fresh();
         two = odd.mas();
         compile(arg.tail, subject, one, fresh, constants, block);
@@ -313,7 +363,9 @@ function compile(formula, subject, product, fresh, constants, block) {
           odd = fresh();
           one = new Block();
           two = new Block();
-          block.append(new Assignment(key, new Cons(subject, new Constant(hint.tail))));
+          var konst = fresh();
+          block.append(new Assignment(konst, new Constant(hint.tail)));
+          block.append(new Assignment(key, new Cons(subject, konst)));
           block.append(new Assignment(got, new GetMemo(two)));
           block.append(new Assignment(odd, new Deep(got)));
           one.append(new Assignment(product, new Frag(toNoun(3), got)));
@@ -321,8 +373,11 @@ function compile(formula, subject, product, fresh, constants, block) {
           two.append(new PutMemo(key, product));
           block.append(new If(odd, one, two));
         }
+        else if ( zep.equals(SLOG) ) {
+          block.append(new Slog(clu));
+          compile(arg.tail, subject, product, fresh, constants, block);
+        }
         else if ( zep.equals(FAST) ) {
-          one = fresh();
           compile(arg.tail, subject, product, fresh, constants, block);
           block.append(new Fast(product));
         }
@@ -331,9 +386,12 @@ function compile(formula, subject, product, fresh, constants, block) {
                   zep.equals(HUNK) ||
                   zep.equals(LOSE) ) {
           one = fresh();
-          block.append(new Push(zep, clu));
+          two = fresh();
+          block.append(new Assignment(one, new Constant(zep)));
+          block.append(new Assignment(two, new Cons(one, clu)));
+          block.append(new Push(two));
           compile(arg.tail, subject, product, fresh, constants, block);
-          block.append(new Pop(zep));
+          block.append(new Pop());
         }
         else {
           // unrecognized
@@ -358,51 +416,90 @@ function Trampoline(target, subject) {
   this.subject = subject;
 }
 
-var runtime = {
-  yes: noun.Atom.yes,
-  no:  noun.Atom.no,
-  cons: function (h, t) {
-    return new Cell(h, t);
-  },
-  trampoline: function(tgt, bus) {
-    return new Trampoline(tgt, bus);
-  },
-  isTrampoline: function(a) {
-    return (a instanceof Trampoline);
-  },
-  compile: function(cell) {
-    var i = 0;
-    var fresh = function() {
-      return "v" + ++i;
-    };
-    var body = new Block();
-    var constants = [];
-    compile(cell, "subject", "product", fresh, constants, body);
-    var text = "return function(subject){" + body.toJs() + "return product;}";
-    console.log(text);
-    var builder = new Function("runtime", "constants", text);
-    return cell.target = builder(this, constants);
-  },
-  nock: function(subject, formula) {
-    var product, target;
-    if ( !formula.hasOwnProperty("target") ) {
-      this.compile(formula);
+function Context() {
+  this.memo = new NounMap();
+  this.dash = new NounMap();
+  this.tax  = noun.Atom.yes;
+}
+
+Context.prototype.yes = noun.Atom.yes;
+Context.prototype.no = noun.Atom.no;
+Context.prototype.cons = function (h, t) {
+  return new Cell(h, t);
+};
+
+Context.prototype.trampoline: function(tgt, bus) {
+  return new Trampoline(tgt, bus);
+};
+
+Context.prototype.isTrampoline = function(a) {
+  return (a instanceof Trampoline);
+};
+
+Context.prototype.compile = function(cell) {
+  var i = 0;
+  var fresh = function() {
+    return "v" + ++i;
+  };
+  var body = new Block();
+  var constants = [];
+  compile(cell, "subject", "product", fresh, constants, body);
+  var text = "return function(subject){" + body.toJs() + "return product;}";
+  console.log(text);
+  var builder = new Function("context", "constants", text);
+  return cell.target = builder(this, constants);
+};
+
+Context.prototype.nock = function(subject, formula) {
+  var product, target;
+  if ( !formula.hasOwnProperty("target") ) {
+    this.compile(formula);
+  }
+  target = formula.target;
+  while ( true ) {
+    product = target(subject);
+    if ( product instanceof Trampoline ) {
+      subject = product.subject;
+      target  = product.target;
     }
-    target = formula.target;
-    while ( true ) {
-      product = target(subject);
-      if ( product instanceof Trampoline ) {
-        subject = product.subject;
-        target  = product.target;
-      }
-      else {
-        return product;
-      }
+    else {
+      return product;
     }
   }
 };
 
+Context.prototype.getMemo = function(key) {
+  return this.memo.get(key);
+}
+
+Context.prototype.putMemo = function(key, val) {
+  this.memo.insert(key, val);
+};
+
+Context.prototype.stackPush = function(item) {
+  this.tax = new Cell(item, this.tax);
+};
+
+Context.prototype.stackPop = function() {
+  this.tax = this.tax.tail;
+}
+
+Context.prototype.slog = function(item) {
+  // TODO: don't rewrite ++wash again, just call the kernel
+  console.log(item);
+};
+
+Context.prototype.register = function(core, clue) {
+  var bat = core.head;
+  var loc = this.dash.get(bat);
+  if ( undefined === loc ) {
+    console.log("TODO: Register " + clue.toString());
+  }
+  else {
+    this.dash.insert(bat, clue);
+  }
+};
 
 module.exports = {
-  runtime: runtime
+  Context: Context
 }
