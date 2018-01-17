@@ -138,8 +138,19 @@ function Atom(number) {
 Atom.prototype = Object.create(Noun.prototype);
 Atom.prototype.constructor = Atom;
 
+var small = new Array(256);
+(function() {
+  var i, bi;
+  for ( i = 0; i < 256; ++i ) {
+    bi = new BigInteger();
+    bi.fromInt(i);
+    small[i] = new Atom(bi);
+  }
+})();
+
 var shortBi = new BigInteger();
 shortBi.fromInt(65536);
+
 
 Atom.prototype.pretty = function(out, tail) {
   if ( this.number.compareTo(shortBi) < 0 ) {
@@ -157,7 +168,6 @@ Atom.prototype.pretty = function(out, tail) {
       else if ( isTas && !((c > 47 && c < 58) ||  // digits
                            (c > 96 && c < 123) || // lowercase letters
                             c === 45) ) {         // -
-        console.log(c + "is not a tas");
         isTas = false;
       }
       tap.push(String.fromCharCode(c));
@@ -251,9 +261,14 @@ function s(str) {
 }
 
 function i(num) {
-  var bi = new BigInteger();
-  bi.fromInt(num);
-  return new Atom(bi);
+  if ( num < 256 ) {
+    return small[num];
+  }
+  else {
+    var bi = new BigInteger();
+    bi.fromInt(num);
+    return new Atom(bi);
+  }
 }
 
 function m(str) {
@@ -298,8 +313,8 @@ module.exports = {
 		Atom: Atom,
 		yes:  i(0),
 		no:   i(1),
-    m:    m,
-		i:    i,
-		s:    s,
+    fromMote:   m,
+		fromInt:    i,
+		fromString: s,
 	},
 };

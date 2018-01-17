@@ -5,6 +5,7 @@
 * some kind of real hashmap (needed for memoization at least). DONE
 * nock->js compiler (THE REALLY INTERESTING PART). DONE (at least, v1)
 * decrement. DONE
+* jam/cue for pill reading (makes testing easier).
 * add
 * jets (basic binding)
 * ackerman
