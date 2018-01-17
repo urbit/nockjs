@@ -3,9 +3,10 @@
 * unifying equals. DONE
 * dorky embedded DSL for nouns. DONE
 * some kind of real hashmap (needed for memoization at least). DONE
-* nock->js compiler (THE REALLY INTERESTING PART)
-* decrement
+* nock->js compiler (THE REALLY INTERESTING PART). DONE (at least, v1)
+* decrement. DONE
 * add
+* jets (basic binding)
 * ackerman
 * atom-gates.pill
 * ALL jets (ref: jaque)
@@ -24,3 +25,15 @@ but will likely be quite accepatable (especially for in-browser things).
 
 At the very least, using an ivory pill to compile and run hoon from the
 browser will ease client-side programming tasks.
+
+--- future implementation ideas
+
+it would be feasible to add profiling code to the compiled javascript,
+specifically in callsites (9), so that the 9 would run say 100 times and
+then recompile itself with a check and a direct call to the most called
+battery. this would also enable loop finding in tail position where the
+most called battery is the one being compiled. (important here not to
+use the 2 compiler cache, but to have a generated call site per battery)
+
+it would be cool to profile that single optimization, all other things 
+being equal. it should be the most important one.

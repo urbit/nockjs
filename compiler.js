@@ -273,7 +273,7 @@ function compile(formula, subject, product, fresh, constants, block) {
     compile(arg, subject, two, fresh, constants, block);
     block.append(new Assignment(product, new Cons(one, two)));
   }
-  else switch ( op.intValue() ) {
+  else switch ( op.valueOf() ) {
     case 0:
       if ( 0 === arg ) {
         block.append(new Bail());
@@ -336,7 +336,7 @@ function compile(formula, subject, product, fresh, constants, block) {
       break;
     case 9:
       odd = arg.head;
-      if ( 2 === odd.cap().intValue() ) {
+      if ( 2 === odd.cap().valueOf() ) {
         one = fresh();
         two = odd.mas();
         compile(arg.tail, subject, one, fresh, constants, block);
@@ -428,7 +428,7 @@ Context.prototype.cons = function (h, t) {
   return new Cell(h, t);
 };
 
-Context.prototype.trampoline: function(tgt, bus) {
+Context.prototype.trampoline = function(tgt, bus) {
   return new Trampoline(tgt, bus);
 };
 
