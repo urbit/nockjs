@@ -17,12 +17,14 @@ function equals(t, got, expected, msg) {
   }
 }
 
-var genAtom = gen.array(gen.intWithin(0, 16)).then(function (digits) {
-  for ( var i = 0; i < digits.length; ++i ) {
-    digits[i] = digits[i].toString(16);
-  }
-  return new noun.Atom.Atom(new BigInteger(digits.join(''), 16));
-});
+var genSmall = gen.posInt.then(noun.Atom.fromInt),
+    genBig = gen.array(gen.intWithin(0, 16), { minSize: 10 }).then(function (digits) {
+      for ( var i = 0; i < digits.length; ++i ) {
+        digits[i] = digits[i].toString(16);
+      }
+      return new noun.Atom.Atom(new BigInteger(digits.join(''), 16));
+    }),
+    genAtom = gen.oneOf([genSmall, genBig]);
 
 function mkCellGen(g1) {
   return gen.array(g1, {size: 2}).then(function(a) {
