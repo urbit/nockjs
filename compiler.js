@@ -259,7 +259,7 @@ Slog.prototype.toJs = function() {
   return "context.slog(" + this.name + ")";
 };
 
-function compile(formula, subject, product, fresh, constants, block) {
+function compile(formula, subject, product, fresh, constants, block, tail) {
   var op, arg, one, two, odd;
   if ( !(formula instanceof Cell )) {
     throw new Error("invalid formula");
@@ -269,8 +269,8 @@ function compile(formula, subject, product, fresh, constants, block) {
   if ( op instanceof Cell ) {
     one = fresh();
     two = fresh();
-    compile(op, subject, one, fresh, constants, block);
-    compile(arg, subject, two, fresh, constants, block);
+    compile(op, subject, one, fresh, constants, block, false);
+    compile(arg, subject, two, fresh, constants, block, false);
     block.append(new Assignment(product, new Cons(one, two)));
   }
   else switch ( op.valueOf() ) {
@@ -292,71 +292,71 @@ function compile(formula, subject, product, fresh, constants, block) {
     case 2:
       one = fresh();
       two = fresh();
-      compile(arg.head, subject, one, fresh, constants, block);
-      compile(arg.tail, subject, two, fresh, constants, block);
-      block.append(new Assignment(product, new Nock(one, two)));
+      compile(arg.head, subject, one, fresh, constants, block, false);
+      compile(arg.tail, subject, two, fresh, constants, block, false);
+      block.append(new Assignment(product, new Nock(one, two, tail)));
       break;
     case 3:
       one = fresh();
-      compile(arg, subject, one, fresh, constants, block);
+      compile(arg, subject, one, fresh, constants, block, false);
       block.append(new Assignment(product, new Deep(one)));
       break;
     case 4:
       one = fresh();
-      compile(arg, subject, one, fresh, constants, block);
+      compile(arg, subject, one, fresh, constants, block, false);
       block.append(new Assignment(product, new Bump(one)));
       break;
     case 5:
       one = fresh();
       two = fresh();
-      compile(arg.head, subject, one, fresh, constants, block);
-      compile(arg.tail, subject, two, fresh, constants, block);
+      compile(arg.head, subject, one, fresh, constants, block, false);
+      compile(arg.tail, subject, two, fresh, constants, block, false);
       block.append(new Assignment(product, new Same(one, two)));
       break;
     case 6:
       odd = fresh();
       one = new Block();
       two = new Block();
-      compile(arg.head, subject, odd, fresh, constants, block);
-      compile(arg.tail.head, subject, product, fresh, constants, one);
-      compile(arg.tail.tail, subject, product, fresh, constants, two);
+      compile(arg.head, subject, odd, fresh, constants, block, false);
+      compile(arg.tail.head, subject, product, fresh, constants, one, tail);
+      compile(arg.tail.tail, subject, product, fresh, constants, two, tail);
       block.append(new If(odd, one, two));
       break;
     case 7:
       one = fresh();
-      compile(arg.head, subject, one, fresh, constants, block);
-      compile(arg.tail, one, product, fresh, constants, block);
+      compile(arg.head, subject, one, fresh, constants, block, false);
+      compile(arg.tail, one, product, fresh, constants, block, tail);
       break;
     case 8:
       one = fresh();
       two = fresh();
-      compile(arg.head, subject, one, fresh, constants, block);
+      compile(arg.head, subject, one, fresh, constants, block, false);
       block.append(new Assignment(two, new Cons(one, subject)));
-      compile(arg.tail, two, product, fresh, constants, block);
+      compile(arg.tail, two, product, fresh, constants, block, tail);
       break;
     case 9:
       odd = arg.head;
       if ( 2 === odd.cap().valueOf() ) {
         one = fresh();
         two = odd.mas();
-        compile(arg.tail, subject, one, fresh, constants, block);
-        block.append(new Assignment(product, new Kick(two, one)));
+        compile(arg.tail, subject, one, fresh, constants, block, false);
+        block.append(new Assignment(product, new Kick(two, one, tail)));
       }
       else {
         compile(noun.dwim([7, arg.tail, 2, [0, 1], 0, odd]),
-          subject, product, fresh, constants, block);
+          subject, product, fresh, constants, block, tail);
       }
       break;
     case 10:
       var hint = arg.head;
       if ( !(arg.head instanceof Cell) ) {
         // no recognized static hints
-        compile(arg.tail, subject, product, fresh, constants, block);
+        compile(arg.tail, subject, product, fresh, constants, block, tail);
       }
       else {
         var zep = hint.head;
         var clu = fresh();
-        compile(hint.tail, subject, clu, fresh, constants, block);
+        compile(hint.tail, subject, clu, fresh, constants, block, false);
         if ( zep.equals(MEMO) ) {
           var key = fresh();
           var got = fresh();
@@ -369,16 +369,16 @@ function compile(formula, subject, product, fresh, constants, block) {
           block.append(new Assignment(got, new GetMemo(two)));
           block.append(new Assignment(odd, new Deep(got)));
           one.append(new Assignment(product, new Frag(toNoun(3), got)));
-          compile(arg.tail, subject, product, fresh, two);
+          compile(arg.tail, subject, product, fresh, two, false);
           two.append(new PutMemo(key, product));
           block.append(new If(odd, one, two));
         }
         else if ( zep.equals(SLOG) ) {
           block.append(new Slog(clu));
-          compile(arg.tail, subject, product, fresh, constants, block);
+          compile(arg.tail, subject, product, fresh, constants, block, tail);
         }
         else if ( zep.equals(FAST) ) {
-          compile(arg.tail, subject, product, fresh, constants, block);
+          compile(arg.tail, subject, product, fresh, constants, block, false);
           block.append(new Fast(product));
         }
         else if ( zep.equals(SPOT) ||
@@ -390,20 +390,20 @@ function compile(formula, subject, product, fresh, constants, block) {
           block.append(new Assignment(one, new Constant(zep)));
           block.append(new Assignment(two, new Cons(one, clu)));
           block.append(new Push(two));
-          compile(arg.tail, subject, product, fresh, constants, block);
+          compile(arg.tail, subject, product, fresh, constants, block, false);
           block.append(new Pop());
         }
         else {
           // unrecognized
-          compile(arg.tail, subject, product, fresh, constants, block);
+          compile(arg.tail, subject, product, fresh, constants, block, tail);
         }
       }
       break;
     case 11:
       one = fresh();
       two = fresh();
-      compile(arg.head, subject, one, fresh, constants, block);
-      compile(arg.tail, subject, two, fresh, constants, block);
+      compile(arg.head, subject, one, fresh, constants, block, false);
+      compile(arg.tail, subject, two, fresh, constants, block, false);
       block.append(new Assignment(product, new Esc(one, two)));
       break;
     default:
@@ -443,9 +443,9 @@ Context.prototype.compile = function(cell) {
   };
   var body = new Block();
   var constants = [];
-  compile(cell, "subject", "product", fresh, constants, body);
+  compile(cell, "subject", "product", fresh, constants, body, true);
   var text = "return function(subject){" + body.toJs() + "return product;}";
-  //console.log(text);
+  console.log(text);
   var builder = new Function("context", "constants", text);
   return cell.target = builder(this, constants);
 };

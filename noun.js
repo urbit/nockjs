@@ -256,8 +256,8 @@ Atom.prototype.shortCode = function() {
   return this.number.toString(36); // max supported by BigInteger
 };
 
-function s(str) {
-	return new Atom(new BigInteger(str));
+function s(str, radix) {
+	return new Atom(new BigInteger(str, radix));
 }
 
 function i(num) {
