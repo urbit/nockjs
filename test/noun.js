@@ -1,20 +1,58 @@
-var tap = require('tap');
-var noun = require('../noun.js');
-var BigInteger = require('jsbn').BigInteger;
+var noun = require('../noun.js'),
+    test = require('tape'),
+    tchk = require('testcheck'),
+    gen  = tchk.gen,
+    BigInteger = require('jsbn').BigInteger;
 
-function is(a, b, msg) {
-  if ( a.equals(b) ) {
-    tap.pass(msg);
+function equals(t, got, expected, msg) {
+  if ( got.equals(expected) ) {
+    t.pass(msg);
     return true;
   }
   else {
-    tap.fail(msg);
-    tap.comment("got:      " + b.toString());
-    tap.comment("expected: " + a.toString());
+    t.fail(msg);
+    t.comment("got:      " + got.toString());
+    t.comment("expected: " + expected.toString());
     return false;
   }
 }
 
+var genAtom = gen.array(gen.intWithin(0, 16)).then(function (digits) {
+  for ( var i = 0; i < digits.length; ++i ) {
+    digits[i] = digits[i].toString(16);
+  }
+  return new noun.Atom.Atom(new BigInteger(digits.join(''), 16));
+});
+
+function mkCellGen(g1) {
+  return g1.then(function(head) {
+    return g1.then(function(tail) {
+      return new noun.Cell(head, tail);
+    });
+  });
+}
+
+var genCell = gen.nested(mkCellGen, genAtom),
+    genNoun = gen.oneOf([genAtom, genCell]);
+
+module.exports = {
+  genAtom: genAtom,
+  genCell: genCell,
+  genNoun: genNoun,
+};
+
+/*
+const { check, gen } = require('tape-check')
+
+test('maps work like maps', check(
+
+test('addition is commutative', check(gen.int, gen.int, (t, numA, numB) => {
+    t.plan(1)
+    t.equal(numA + numB, numB + numA)
+}));
+*/
+
+/*
 function randomAtom() {
   var c, i, bytes = Math.floor(Math.random() * 4) + 1;
   var c = new BigInteger();
@@ -40,10 +78,11 @@ function randomNoun(depth) {
     return randomCell(depth);
   }
 }
+*/
 
 module.exports = {
-  is: is,
-  randomNoun: randomNoun,
-  randomCell: randomCell,
-  randomAtom: randomAtom
+  equals: equals,
+  genAtom: genAtom,
+  genCell: genCell,
+  genNoun: genNoun,
 };

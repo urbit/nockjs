@@ -1,10 +1,12 @@
-var noun = require('./noun.js'),
-    Cell = noun.Cell,
-    bits = require('./bits.js'),
-    zero = noun.Atom.yes,
-    one  = noun.Atom.no,
-    i    = noun.Atom.fromInt,
-    two  = i(2),
+var noun    = require('./noun.js'),
+    list    = require('./list.js'),
+    Cell    = noun.Cell,
+    bits    = require('./bits.js'),
+    zero    = noun.Atom.yes,
+    one     = noun.Atom.no,
+    i       = noun.Atom.fromInt,
+    two     = i(2),
+    three   = i(3),
     NounMap = require('./hamt.js').NounMap;
 
 function rub(a, b) {
@@ -89,10 +91,77 @@ function cue(a) {
   return cue_in(new NounMap(), a, zero).tail.head;
 }
 
+function mat(a) {
+	if ( zero.equals(a) ) {
+		return noun.dwim(1, 1);
+	}
+  else {
+		var b = noun.dwim(bits.met(0, a)),
+		    c = noun.dwim(bits.met(0, b)),
+		    u = bits.dec(c),
+        v = bits.add(c, c),
+        x = bits.end(zero, u, b),
+        w = bits.bex(c),
+        y = bits.lsh(zero, u, a),
+        z = bits.mix(x, y),
+        p = bits.add(v, b),
+        q = bits.cat(zero, w, z);
+    return noun.dwim(p, q);
+	}       
+}
+
+function _jam_in_pair(m, h_a, t_a, b, l) {
+	var w = noun.dwim([2, 1], l),
+      x = bits.add(two, b),
+      d = _jam_in(m, h_a, x, w),
+      y = bits.add(x, d.head),
+      e = _jam_in(m, t_a, y, d.tail.head),
+      z = bits.add(d.head, e.head);
+
+  return noun.dwim(bits.add(two, z), e.tail.head, zero);
+}
+
+function _jam_in_ptr(m, u_c, l) {
+  var d = mat(u_c),
+      x = bits.lsh(zero, two, d.tail),
+      y = bits.add(two, d.head);
+
+  return noun.dwim(y, [[y, bits.mix(three, x)], l], zero);
+}
+
+function _jam_in_flat(m, a, l) {
+	var d = mat(a),
+      x = bits.add(one, d.head);
+
+  return noun.dwim(x, [[x, bits.lsh(zero, one, d.tail)], l], zero);
+}
+
+function _jam_in(m, a, b, l) {
+  var x, c = m.get(a);
+
+  if ( undefined == c ) {
+    m.insert(a, b);
+    return a.deep ?
+      _jam_in_pair(m, a.head, a.tail, b, l) :
+      _jam_in_flat(m, a, l);
+  }
+  else if ( !a.deep && bits.met(0, a) <= bits.met(0, c) ) {
+    return _jam_in_flat(m, a, l);
+  }
+  else {
+    return _jam_in_ptr(m, c, l);
+  }
+}
+
 function jam(n) {
+  var x = _jam_in(new NounMap(), n, zero, zero),
+      q = list.flop(x.tail.head);
+
+  return bits.can(zero, q);
 }
 
 module.exports = {
   cue: cue,
+  mat: mat,
   jam: jam
 };

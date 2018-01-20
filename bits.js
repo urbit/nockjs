@@ -50,6 +50,16 @@ function sub(a, b) {
   }
 }
 
+function lsh(a, b, c) {
+  var bits = b.number.shiftLeft(a.number.intValue()).intValue();
+  return new noun.Atom.Atom(c.number.shiftLeft(bits));
+}
+
+function rsh(a, b, c) {
+  var bits = b.number.shiftLeft(a.number.intValue()).intValue();
+  return new noun.Atom.Atom(c.number.shiftRight(bits));
+}
+
 // to/from little-endian 32-bit word array, as used in vere
 // TODO: efficiency is horrible here, but can be improved using internals
 function bytesToWords(bytes) {
@@ -86,6 +96,7 @@ function wordsToBytes(words) {
     buf[b++] = 0xff & ((w & 0x00FF0000) >>> 16);
     buf[b++] = 0xff & ((w & 0xFF000000) >>> 24);
   }
+  // or here. one of the 'get rid of extra zeros' functions.
   while ( buf[--b] === 0 ) {
     buf.pop();
   }
@@ -93,23 +104,13 @@ function wordsToBytes(words) {
 };
 
 function bytesToAtom(bytes) {
-  var byt, parts = [], even = false, scratch = 0;
-  for ( var i = bytes.length; i >= 0; --i ) {
+  var byt, parts = [];
+  for ( var i = bytes.length - 1; i >= 0; --i ) {
     byt = bytes[i] & 0xff;
-    if ( even ) {
-      parts.push(((scratch << 8) | byt).toString(16));
-      scratch = 0;
-    }
-    else {
-      scratch = byt;
-    }
-    even = !even;
-  }
-  if ( scratch > 0 ) {
-    parts.push(scratch.toString(16));
+    parts.push(byt < 16 ? ("0" + byt.toString(16)) : byt.toString(16));
   }
   return new noun.Atom.Atom(new BigInteger(parts.join(''), 16));
-};
+}
 
 function atomToWords(atom) {
   return bytesToWords(atomToBytes(atom));
@@ -118,11 +119,8 @@ function atomToWords(atom) {
 function atomToBytes(atom) {
   var bytes = atom.number.toByteArray();
   var i, j, r = new Array(bytes.length);
-  for ( j = 0, i = bytes.length; i >= 0; --i, ++j ) {
+  for ( j = 0, i = bytes.length-1; i >= 0; --i, ++j ) {
     r[j] = bytes[i]&0xff;
-  }
-  while ( r[0] === 0 ) {
-    r.shift();
   }
   return r;
 }
@@ -148,7 +146,7 @@ function chop(met, fum, wid, tou, dst, src) {
       len = buf.length,
       i, j, san, mek, baf, bat, hut, san,
       wuf, wut, waf, raf, wat, rat, hop;
-
+  
   if ( met < 5 ) {
     san = 1 << met;
     mek = ((1 << san) - 1);
@@ -160,8 +158,8 @@ function chop(met, fum, wid, tou, dst, src) {
       raf = baf & 31;
       wat = bat >>> 5;
       rat = bat & 31;
-      hop = (waf >= len) ? 0 : buf[waf];
-      hop = (hop >>> raf) & mek;
+      hop = ((waf >= len) ? 0 : buf[waf]);
+      hop = ((hop >>> raf) & mek);
       dst[wat] ^= hop << rat;
       baf += san;
       bat += san;
@@ -206,6 +204,118 @@ function cut(a, b, c, d) {
   }
 }
 
+var maxCat = noun.Atom.fromInt(0xffffffff);
+var catBits = noun.Atom.fromInt(32);
+
+function end(a, b, c) {
+  if ( gth(a, catBits) ) {
+    throw new Error("Fail");
+  }
+  else if ( gth(b, maxCat) ) {
+    return c;
+  }
+	else {
+    var ai = a.number.intValue(),
+        bi = b.number.intValue(),
+       len = met(ai, c);
+
+    if ( 0 === bi ) {
+      return zero;
+    }
+    else if ( bi >= len ) {
+      return c;
+    }
+    else {
+      var sal = slaq(ai, bi);
+      chop(ai, 0, bi, 0, sal, c);
+      return malt(sal);
+    }
+	}   
+}
+
+function mix(a, b) {
+  return new noun.Atom.Atom(a.number.xor(b.number));
+}
+
+function cat(a, b, c) {
+	if ( gth(a, catBits) ) {
+		throw new Error("Fail");
+	}
+	else {
+		var ai = a.number.intValue(),
+       lew = met(ai, b),
+       ler = met(ai, c),
+       all = lew + ler;
+
+    if ( 0 === all ) {
+      return zero;
+    }
+    else {
+      var sal = slaq(ai, all);
+      chop(ai, 0, lew, 0, sal, b);
+      chop(ai, 0, ler, lew, sal, c);
+      return malt(sal);
+    }
+	}
+}
+
+function can(a, b) {
+  if ( gth(a, catBits) ) {
+    throw new Error("Fail");
+  }
+  else {
+    var ai = a.number.intValue(),
+      tot = 0,
+      cab = b,
+      pos, i_cab, pi_cab, qi_cab;
+
+    // measure
+    while ( true ) {
+      if ( zero.equals(cab) ) {
+        break;
+      }
+      if ( !cab.deep ) {
+        throw new Error("Fail");
+      }
+      i_cab = cab.head;
+      if ( !i_cab.deep ) {
+        throw new Error("Fail");
+      }
+      pi_cab = i_cab.head;
+      qi_cab = i_cab.tail;
+      if ( gth(pi_cab, maxCat) ) {
+        throw new Error("Fail");
+      }
+      if ( qi_cab.deep ) {
+        throw new Error("Fail");
+      }
+      if ( (tot + pi_cab) < tot ) {
+        throw new Error("Fail");
+      }
+      tot += pi_cab;                                                                                                                        
+      cab = cab.tail;
+    }                                                                                                                                         
+    if ( 0 === tot ) {                                                                                                                       
+      return zero;                                                                                                                               
+    }                                                                                                                                         
+    sal = slaq(ai, tot);
+
+    // chop the list atoms in                                                                                                                  
+    cab = b;                                                                                                                          
+    pos = 0;                                                                                                                        
+    while ( !zero.equals(cab) ) {
+      i_cab  = cab.head;
+      pi_cab = i_cab.head.number.intValue();
+      qi_cab = i_cab.tail;
+
+      chop(ai, 0, pi_cab, pos, sal, qi_cab);                                                                                         
+      pos += pi_cab;                                                                                                                        
+      cab = cab.tail;
+    }                                                                                                                                         
+    return malt(sal);     
+  }
+}
+
 module.exports = {
   met: met,
   cut: cut,
@@ -217,6 +327,12 @@ module.exports = {
   gte: gte,
   lte: lte,
   bex: bex,
+  lsh: lsh,
+  rsh: rsh,
+  end: end,
+  mix: mix,
+  cat: cat,
+  can: can,
   bytesToWords: bytesToWords,
   wordsToBytes: wordsToBytes,
   bytesToAtom: bytesToAtom,

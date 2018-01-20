@@ -5,7 +5,8 @@
 * some kind of real hashmap (needed for memoization at least). DONE
 * nock->js compiler (THE REALLY INTERESTING PART). DONE (at least, v1)
 * decrement. DONE
-* jam/cue for pill reading (makes testing easier).
+* port random-noun tests to tape-check. DONE
+* jam/cue for pill reading (makes testing easier). DONE
 * add
 * jets (basic binding)
 * ackerman
@@ -19,6 +20,7 @@
   i.e. send me pokes, i handle all persistence and send you io 
 ^--- candidate vere backend
      urbit in the browser
+* urbit over webrtc?
 
 At this point, we have a working vere backend, as well as a full
 "urbit in the browser".  Performance is unlikely to be as good as jaque,
