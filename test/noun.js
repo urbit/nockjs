@@ -25,10 +25,8 @@ var genAtom = gen.array(gen.intWithin(0, 16)).then(function (digits) {
 });
 
 function mkCellGen(g1) {
-  return g1.then(function(head) {
-    return g1.then(function(tail) {
-      return new noun.Cell(head, tail);
-    });
+  return gen.array(g1, {size: 2}).then(function(a) {
+    return new noun.Cell(a[0], a[1]);
   });
 }
 
