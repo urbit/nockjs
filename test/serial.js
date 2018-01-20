@@ -16,7 +16,7 @@ test('examples', function(t) {
   nounT.equals(t, serial.jam(serial.cue(addPill)), addPill, "add pill");
 });
 
-test('generative', check(nounT.genNoun, function(t, n) {
+test('generative', check({times: 1000}, nounT.genNoun, function(t, n) {
   t.plan(1);
   nounT.equals(t, serial.cue(serial.jam(n)), n, 'round trip');
 }));
