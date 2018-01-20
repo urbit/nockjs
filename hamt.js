@@ -31,7 +31,7 @@ Node.prototype.insert = function(key, val, lef, rem) {
     this.slots[inx] = this.slots[inx].insert(key, val, lef, rem);
   }
   else {
-    this.map |= 1 << bit;
+    this.map |= (1 << bit);
     this.slots.splice(inx, 0, new Single(key, val));
   }
   return this;
@@ -41,10 +41,10 @@ Node.prototype.get = function(key, lef, rem) {
   var bit, inx;
   lef -= 5;
   bit = rem >>> lef;
-  rem = rem & ((1 << lef) - 1);
-  inx = popcnt(this.map & ((1 << bit) - 1));
+  rem &= ((1 << lef) - 1);
 
   if ( this.map & (1 << bit) ) {
+    inx = popcnt(this.map & ((1 << bit) - 1));
     return this.slots[inx].get(key, lef, rem);
   }
   else {
@@ -99,14 +99,15 @@ Single.prototype.insert = function(key, val, lef, rem) {
     return this;
   }
   else {
-    var n;
+    var n, rom = this.key.mug() & ((1 << lef) - 1);
+
     if ( lef > 0 ) {
       n = new Node();
     }
     else {
       n = new Bucket();
     }
-    n.insert(this.key, this.val, lef, rem);
+    n.insert(this.key, this.val, lef, rom);
     n.insert(key, val, lef, rem);
     return n;
   }

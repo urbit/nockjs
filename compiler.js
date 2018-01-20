@@ -445,7 +445,7 @@ Context.prototype.compile = function(cell) {
   var constants = [];
   compile(cell, "subject", "product", fresh, constants, body);
   var text = "return function(subject){" + body.toJs() + "return product;}";
-  console.log(text);
+  //console.log(text);
   var builder = new Function("context", "constants", text);
   return cell.target = builder(this, constants);
 };
