@@ -1,55 +1,33 @@
-/* https://jsperf.com/popcount-comparison */
-function popcnt (n) {
-  n -= n >> 1 & 0x55555555;
-  n = (n & 0x33333333) + (n >> 2 & 0x33333333);
-  n = n + (n >> 4) & 0x0f0f0f0f;
-  n += n >> 8;
-  n += n >> 16;
-
-  return n & 0x7f;
-}
-
 function Slot() {
 }
 
 function Node() {
   Slot.call(this);
-  this.map = 0;
-  this.slots = [];
+  this.slots = new Array(32);
 }
 Node.prototype = Object.create(Slot.prototype);
 Node.prototype.constructor = Node;
 
 Node.prototype.insert = function(key, val, lef, rem) {
-  var bit, map, inx;
+  var inx;
   lef -= 5;
-  bit = rem >>> lef;
+  inx = rem >>> lef;
   rem &= ((1 << lef) - 1);
-  inx = popcnt(this.map & ((1 << bit) - 1));
-  
-  if ( this.map & (1 << bit) ) {
-    this.slots[inx] = this.slots[inx].insert(key, val, lef, rem);
-  }
-  else {
-    this.map |= (1 << bit);
-    this.slots.splice(inx, 0, new Single(key, val));
-  }
+
+  this.slots[inx] = ( undefined === this.slots[inx] )
+                  ? new Single(key, val)
+                  : this.slots[inx].insert(key, val, lef, rem);
   return this;
 };
 
 Node.prototype.get = function(key, lef, rem) {
-  var bit, inx;
+  var inx, sot;
   lef -= 5;
-  bit = rem >>> lef;
+  inx = rem >>> lef;
   rem &= ((1 << lef) - 1);
+  sot = this.slots[inx];
 
-  if ( this.map & (1 << bit) ) {
-    inx = popcnt(this.map & ((1 << bit) - 1));
-    return this.slots[inx].get(key, lef, rem);
-  }
-  else {
-    return undefined;
-  }
+  return ( undefined === sot ) ? undefined : sot.get(key, lef, rem);
 };
 
 function Bucket() {

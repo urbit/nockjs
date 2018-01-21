@@ -494,9 +494,9 @@ Context.prototype.register = function(core, clue) {
   var loc = this.dash.get(bat);
   if ( undefined === loc ) {
     console.log("TODO: Register " + clue.toString());
+    this.dash.insert(bat, clue);
   }
   else {
-    this.dash.insert(bat, clue);
   }
 };
 
