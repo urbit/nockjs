@@ -148,9 +148,35 @@ var small = new Array(256);
   }
 })();
 
+Noun.prototype.at = function(a) {
+  if ( small[1].equals(a) ) {
+    return this;
+  }
+  else {
+    throw new Error("fragment");
+  }
+};
+
+Cell.prototype.at = function(a) {
+  if ( small[1].equals(a) ) {
+    return this;
+  }
+  var next = ( 2 === a.cap().valueOf() ) ? this.head : this.tail;
+  return next.at(a.mas());
+};
+
 var shortBi = new BigInteger();
 shortBi.fromInt(65536);
 
+Atom.cordToString = function(c) {
+  var bytes = c.number.toByteArray(),
+      chars = [];
+
+  for ( i = bytes.length; i >= 0; --i ) {
+    chars.push(String.fromCharCode(bytes[i]));
+  }
+  return chars.join('');
+};
 
 Atom.prototype.pretty = function(out, tail) {
   if ( this.number.compareTo(shortBi) < 0 ) {

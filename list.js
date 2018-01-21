@@ -19,6 +19,22 @@ function flop(a) {
 	}
 }
 
+function forEach(n, f) {
+  while ( true ) {
+    if ( zero.equals(n) ) {
+      return;
+    }
+    else if ( !n.deep ) {
+      throw new Error("Bail");
+    }
+    else {
+      f(n.head);
+      n = n.tail;
+    }
+  }
+}
+
 module.exports = {
   flop: flop,
+  forEach: forEach,
 };

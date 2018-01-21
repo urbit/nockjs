@@ -1,5 +1,6 @@
 var noun = require('./noun.js'),
     NounMap = require('./hamt.js').NounMap,
+    list = require('./list.js'),
     Noun = noun.Noun,
     Atom = noun.Atom.Atom,
     Cell = noun.Cell,
@@ -416,10 +417,40 @@ function Trampoline(target, subject) {
   this.subject = subject;
 }
 
+var three = n(3);
+function Location(name, label, axisToParent, hooks, noun, parentLoc) {
+  this.name = name;
+  this.label = label;
+  this.parentLoc = parentLoc;
+  this.axisToParent = axisToParent;
+  this.nameToAxis = hooks;
+  this.axisToName = {};
+  this.isStatic = ( null === parentLoc || (three.equals(axisToParent) && parentLoc.isStatic) );
+  if ( this.isStatic ) {
+    this.noun = noun;
+  }
+  else {
+    this.noun = noun.head;
+    this.noun.mug();
+  }
+  for ( var k in hooks ) {
+    if ( hooks.hasOwnProperty(k) ) {
+      this.axisToName[hooks[k].shortCode()] = k;
+    }
+  }
+}
+
+function Clue(name, parentAxis, hooks) {
+  this.name = name;
+  this.parentAxis = parentAxis;
+  this.hooks = hooks;
+}
+
 function Context() {
-  this.memo = new NounMap();
-  this.dash = new NounMap();
-  this.tax  = noun.Atom.yes;
+  this.memo  = new NounMap();
+  this.clues = new NounMap();
+  this.dash  = new NounMap();
+  this.tax   = noun.Atom.yes;
 }
 
 Context.prototype.yes = noun.Atom.yes;
@@ -489,14 +520,113 @@ Context.prototype.slog = function(item) {
   console.log(item);
 };
 
-Context.prototype.register = function(core, clue) {
+function chum(n) {
+  if ( n.deep ) {
+    return Atom.cordToString(n.head) + n.tail.number.shortValue().toString(10);
+  }
+  else {
+    return Atom.cordToString(n);
+  }
+}
+
+var ten = n(10);
+function skipHints(formula) {
+  while ( true ) {
+    if ( formula.deep ) {
+      if ( ten.equals(c.head) ) {
+        formula = c.tail.tail;
+        continue;
+      }
+    }
+    return formula;
+  }
+}
+
+var constant_zero = n(1,0);
+function parseParentAxis(noun) {
+  var f = skipHints(noun);
+  if ( constant_zero.equals(f) ) {
+    return zero;
+  }
+  else if ( !zero.equals(f.head) ) {
+    throw new Error("weird formula head");
+  }
+  else if ( 3 != f.tail.cap().valueOf() ) {
+    throw new Error("weird parent axis");
+  }
+  return f.tail;
+}
+
+var nine = n(9), constant_frag = n(0,1);
+function parseHookAxis(nock) {
+  var f = skipHints(nock),
+     op = f.head;
+  if ( !op.deep ) {
+    if ( zero.equals(op) ) {
+      if ( !f.tail.deep ) {
+        return f.tail;
+      }
+    }
+    else if ( nine.equals(op) ) {
+      var rest = f.tail;
+      if ( !rest.head.deep && constant_frag.equals(rest.tail) ) {
+        return rest.head;
+      }
+    }
+  }
+  return null;
+}
+
+function parseHooks(noun) {
+  var o = {};
+  list.forEach(noun, function(c) {
+    var term = Atom.cordToString(c.head),
+        axis = parseHookAxis(c.tail);
+    if ( null != axis ) {
+      o[term] = axis;
+    }
+  });
+  return o;
+}
+
+Context.prototype.parseClue = function(raw) {
+  var clue = this.clues.get(raw);
+  if ( clue === undefined ) {
+    var name = chum(clue.head),
+        parentAxis = parseParentAxis(clue.tail.head),
+        hooks = parseHooks(clue.tail.tail);
+    clue = new Clue(name, parentAxis, hooks);
+    this.clues.insert(raw, clue);
+  }
+  return clue;
+}
+
+Context.prototype.register = function(core, raw) {
   var bat = core.head;
   var loc = this.dash.get(bat);
   if ( undefined === loc ) {
-    console.log("TODO: Register " + clue.toString());
-    this.dash.insert(bat, clue);
-  }
-  else {
+    try {
+      var clue = context.parseClue(raw);
+      if ( zero.equals(clue.parentAxis) ) {
+        loc = new Location(clue.name, clue.name, zero, clue.hooks, core, null);
+      }
+      else {
+        var parentCore    = core.at(clue.parentAxis),
+            parentBattery = parentCore.head,
+            parentLoc     = this.dash.get(parentBattery);
+        if ( undefined === parentLoc ) {
+          console.log('register: invalid parent for ' + clue.name);
+        }
+        else {
+          var label = parentLoc.label + "/" + clue.name;
+          loc = new Location(clue.name, label, clue.parentAxis, clue.hooks, core, parentLoc);
+        }
+      }
+      this.dash.insert(bat, loc);
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 };
 
