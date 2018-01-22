@@ -177,11 +177,20 @@ Noun.prototype.at = function(a) {
 var shortBi = new BigInteger();
 shortBi.fromInt(65536);
 
+Atom.prototype.bytes = function() {
+  var bytes = this.number.toByteArray();
+  var r = [];
+  for ( var i = bytes.length-1; i >= 0; --i ) {
+    r.push(bytes[i]&0xff);
+  }
+  return r;
+}
+
 Atom.cordToString = function(c) {
-  var bytes = c.number.toByteArray(),
+  var bytes = c.bytes();
       chars = [];
 
-  for ( i = bytes.length; i >= 0; --i ) {
+  for ( var i = 0; i < bytes.length; ++i ) {
     chars.push(String.fromCharCode(bytes[i]));
   }
   return chars.join('');

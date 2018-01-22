@@ -190,13 +190,16 @@ Kick.prototype.toJs = function() {
 
   return "(function (cor) {" +
            "var pro, tgt, bus, arms, bat = cor.head, has = false;" +
+           "if ( bat.hasOwnProperty('loc') && (tgt = bat.loc.jets[" + axis + "]) && bat.loc.fine(cor) ) {" +
+             "return tgt(cor);" +
+           "}" +
            "if ( bat.hasOwnProperty('arms') ) {" +
              "arms = bat.arms;" +
              "has = arms.hasOwnProperty('" + axis + "');" + 
            "}" +
            "else arms = bat.arms = {};" +
-           "tgt = has ? arms['" + axis + "'] : (arms['" + axis + "'] = context.compile(" + 
-             new Frag(this.axis, "bat").toJs() + "));" + 
+           "tgt = (has ? arms['" + axis + "'] : (arms['" + axis + "'] = context.compile(" +
+             new Frag(this.axis, "bat").toJs() + ")));" +
            "bus = cor;" +
            (this.tail ? "pro = context.trampoline(tgt, bus);" :
              "while (true) {" +
@@ -250,6 +253,16 @@ Pop.prototype.constructor = Pop;
 Pop.prototype.toJs = function() {
   return "context.stackPop()";
 };
+
+function Fast(clue, core) {
+  Statement.call(this);
+  this.clue = clue;
+  this.core = core;
+}
+
+Fast.prototype.toJs = function() {
+  return "context.register(" + this.core + ", " + this.clue + ");";
+}
 
 function Slog(name) {
   Statement.call(this);
@@ -369,7 +382,7 @@ function compile(formula, subject, product, fresh, constants, block, tail) {
           block.append(new Assignment(key, new Cons(subject, konst)));
           block.append(new Assignment(got, new GetMemo(two)));
           block.append(new Assignment(odd, new Deep(got)));
-          one.append(new Assignment(product, new Frag(toNoun(3), got)));
+          one.append(new Assignment(product, new Frag(noun.dwim(3), got)));
           compile(arg.tail, subject, product, fresh, two, false);
           two.append(new PutMemo(key, product));
           block.append(new If(odd, one, two));
@@ -380,7 +393,7 @@ function compile(formula, subject, product, fresh, constants, block, tail) {
         }
         else if ( zep.equals(FAST) ) {
           compile(arg.tail, subject, product, fresh, constants, block, false);
-          block.append(new Fast(product));
+          block.append(new Fast(clu, product));
         }
         else if ( zep.equals(SPOT) ||
                   zep.equals(MEAN) ||
@@ -417,12 +430,28 @@ function Trampoline(target, subject) {
   this.subject = subject;
 }
 
-var three = n(3);
-function Location(name, label, axisToParent, hooks, noun, parentLoc) {
+function genFine(loc) {
+  var constants = [], out = [], i;
+  for ( i = 0; !loc.isStatic; ++i ) {
+    out.push("if(!constants[" + i + "].equals(a.head)){return false;}");
+    constants.push(loc.noun);
+    out.push("a=" + new Frag(loc.axisToParent, "a").toJs() + ";");
+    loc = loc.parentLoc;
+  }
+  out.push("return constants[" + i + "].equals(a);");
+  constants.push(loc.noun);
+  var body = 'return function(a){' + out.join('') + 'return true;};';
+  var builder = new Function('constants', body);
+  return builder(constants);
+}
+
+var three = noun.dwim(3);
+function Location(context, name, label, axisToParent, hooks, noun, parentLoc) {
   this.name = name;
   this.label = label;
   this.parentLoc = parentLoc;
   this.axisToParent = axisToParent;
+  this.fragToParent = Noun.fragmenter(axisToParent);
   this.nameToAxis = hooks;
   this.axisToName = {};
   this.isStatic = ( null === parentLoc || (three.equals(axisToParent) && parentLoc.isStatic) );
@@ -438,6 +467,20 @@ function Location(name, label, axisToParent, hooks, noun, parentLoc) {
       this.axisToName[hooks[k].shortCode()] = k;
     }
   }
+  this.jets = {};
+  var drivers = context.drivers[label];
+  if ( drivers && drivers.length > 0 ) {
+    for ( var i = 0; i < drivers.length; ++i ) {
+      var d = drivers[i];
+      if ( d instanceof AxisArm ) {
+        this.jets[d.axis.mas().shortCode()] = d.fn;
+      }
+      else {
+        this.jets[nameToAxis[d.name].mas().shortCode()] = d.fn;
+      }
+    }
+  }
+  this.fine = genFine(this);
 }
 
 function Clue(name, parentAxis, hooks) {
@@ -446,11 +489,59 @@ function Clue(name, parentAxis, hooks) {
   this.hooks = hooks;
 }
 
-function Context() {
-  this.memo  = new NounMap();
-  this.clues = new NounMap();
-  this.dash  = new NounMap();
-  this.tax   = noun.Atom.yes;
+function JetDriver(label, fn) {
+  this.label = label;
+  this.fn = fn;
+}
+
+function AxisArm(label, axis, fn) {
+  JetDriver.call(this, label, fn);
+  this.axis = axis;
+}
+AxisArm.prototype = Object.create(JetDriver.prototype);
+AxisArm.prototype.constructor = AxisArm;
+
+function NamedArm(label, name, fn) {
+  JetDriver.call(this, label, fn);
+  this.name = name;
+}
+NamedArm.prototype = Object.create(JetDriver.prototype);
+NamedArm.prototype.constructor = NamedArm;
+
+var two = noun.dwim(2);
+function collectFromCore(prefix, spec, out) {
+  var name = spec[0], arms = spec[1], children = spec[2],
+      labl = prefix + "/" + name;
+  if ( arms instanceof Function ) {
+    out[labl] = [new AxisArm(labl, two, arms)];
+  }
+  else {
+    var all = [];
+    for ( var k in arms ) {
+      if ( arms.hasOwnProperty(k) ) {
+        all.push(( 'number' === typeof(k) ) ?
+          new AxisArm(labl, noun.dwim(k), arms[k]) :
+          new NamedArm(labl, k, arms[k]));
+      }
+    }
+    out[labl] = all;
+  }
+  if ( children ) {
+    for ( var i = 0; i < children.length; ++i ) {
+      collectFromCore(labl, children[i], out);
+    }
+  }
+}
+
+function Context(drivers) {
+  this.memo    = new NounMap();
+  this.clues   = new NounMap();
+  this.dash    = new NounMap();
+  this.tax     = noun.Atom.yes;
+  this.drivers = {};
+  if ( drivers ) {
+    collectFromCore('', drivers, this.drivers);
+  }
 }
 
 Context.prototype.yes = noun.Atom.yes;
@@ -476,7 +567,6 @@ Context.prototype.compile = function(cell) {
   var constants = [];
   compile(cell, "subject", "product", fresh, constants, body, true);
   var text = "return function(subject){" + body.toJs() + "return product;}";
-  console.log(text);
   var builder = new Function("context", "constants", text);
   return cell.target = builder(this, constants);
 };
@@ -529,12 +619,12 @@ function chum(n) {
   }
 }
 
-var ten = n(10);
+var ten = noun.dwim(10);
 function skipHints(formula) {
   while ( true ) {
     if ( formula.deep ) {
-      if ( ten.equals(c.head) ) {
-        formula = c.tail.tail;
+      if ( ten.equals(formula.head) ) {
+        formula = formula.tail.tail;
         continue;
       }
     }
@@ -542,7 +632,7 @@ function skipHints(formula) {
   }
 }
 
-var constant_zero = n(1,0);
+var zero = noun.dwim(0), constant_zero = noun.dwim(1,0);
 function parseParentAxis(noun) {
   var f = skipHints(noun);
   if ( constant_zero.equals(f) ) {
@@ -557,7 +647,7 @@ function parseParentAxis(noun) {
   return f.tail;
 }
 
-var nine = n(9), constant_frag = n(0,1);
+var nine = noun.dwim(9), constant_frag = noun.dwim(0,1);
 function parseHookAxis(nock) {
   var f = skipHints(nock),
      op = f.head;
@@ -592,9 +682,9 @@ function parseHooks(noun) {
 Context.prototype.parseClue = function(raw) {
   var clue = this.clues.get(raw);
   if ( clue === undefined ) {
-    var name = chum(clue.head),
-        parentAxis = parseParentAxis(clue.tail.head),
-        hooks = parseHooks(clue.tail.tail);
+    var name = chum(raw.head),
+        parentAxis = parseParentAxis(raw.tail.head),
+        hooks = parseHooks(raw.tail.tail);
     clue = new Clue(name, parentAxis, hooks);
     this.clues.insert(raw, clue);
   }
@@ -606,9 +696,9 @@ Context.prototype.register = function(core, raw) {
   var loc = this.dash.get(bat);
   if ( undefined === loc ) {
     try {
-      var clue = context.parseClue(raw);
+      var clue = this.parseClue(raw);
       if ( zero.equals(clue.parentAxis) ) {
-        loc = new Location(clue.name, clue.name, zero, clue.hooks, core, null);
+        loc = new Location(this, clue.name, '/' + clue.name, zero, clue.hooks, core, null);
       }
       else {
         var parentCore    = core.at(clue.parentAxis),
@@ -619,9 +709,10 @@ Context.prototype.register = function(core, raw) {
         }
         else {
           var label = parentLoc.label + "/" + clue.name;
-          loc = new Location(clue.name, label, clue.parentAxis, clue.hooks, core, parentLoc);
+          loc = new Location(this, clue.name, label, clue.parentAxis, clue.hooks, core, parentLoc);
         }
       }
+      bat.loc = loc;
       this.dash.insert(bat, loc);
     }
     catch (e) {

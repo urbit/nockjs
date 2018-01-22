@@ -112,17 +112,12 @@ function bytesToAtom(bytes) {
   return new noun.Atom.Atom(new BigInteger(parts.join(''), 16));
 }
 
-function atomToWords(atom) {
-  return bytesToWords(atomToBytes(atom));
+function atomToBytes(atom) {
+  return atom.bytes();
 }
 
-function atomToBytes(atom) {
-  var bytes = atom.number.toByteArray();
-  var i, j, r = new Array(bytes.length);
-  for ( j = 0, i = bytes.length-1; i >= 0; --i, ++j ) {
-    r[j] = bytes[i]&0xff;
-  }
-  return r;
+function atomToWords(atom) {
+  return bytesToWords(atomToBytes(atom));
 }
 
 function atomToWords(atom) {
