@@ -148,21 +148,30 @@ var small = new Array(256);
   }
 })();
 
-Noun.prototype.at = function(a) {
-  if ( small[1].equals(a) ) {
-    return this;
+var fragCache = {
+  0: function(a) {
+    throw new Error("Bail");
+  },
+  1: function(a) {
+    return a;
+  },
+};
+var one = small[1];
+Noun.fragmenter = function(a) {
+  var s = a.shortCode();
+  if ( fragCache.hasOwnProperty(s) ) {
+    return fragCache[s];
   }
   else {
-    throw new Error("fragment");
+    for ( var parts = ['a']; !one.equals(a); a = a.mas() ) {
+      parts.push( ( 2 === a.cap().valueOf() ) ? 'head' : 'tail' );
+    }
+    return fragCache[s] = new Function('a', 'return ' + parts.join('.') + ';');
   }
-};
+}
 
-Cell.prototype.at = function(a) {
-  if ( small[1].equals(a) ) {
-    return this;
-  }
-  var next = ( 2 === a.cap().valueOf() ) ? this.head : this.tail;
-  return next.at(a.mas());
+Noun.prototype.at = function(a) {
+  return Noun.fragmenter(a)(this);
 };
 
 var shortBi = new BigInteger();

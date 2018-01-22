@@ -631,5 +631,5 @@ Context.prototype.register = function(core, raw) {
 };
 
 module.exports = {
-  Context: Context
+  Context: Context,
 }
