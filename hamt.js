@@ -132,6 +132,6 @@ NounMap.prototype.get = function(key) {
   }
 };
 
-module.exports = {
+export default {
   NounMap: NounMap
 };
