@@ -7,6 +7,5 @@ A Javascript implementation of [Nock](https://developers.urbit.org/reference/noc
 ## Install
 
 ```
-npm install nockjs
+npm install @urbit/nockjs
 ```
-
