@@ -1,5 +1,5 @@
 {
-  "name": "nockjs",
+  "name": "@urbit/nockjs",
   "version": "0.0.1",
   "description": "javascript urbit runtime",
   "main": "index.js",
