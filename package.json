@@ -1,13 +1,14 @@
 {
   "name": "@urbit/nockjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "javascript urbit runtime",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "tape ./tests/*.js"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -16,9 +17,10 @@
   "keywords": [
     "urbit",
     "nock",
-    "js"
+    "js",
+    "ts"
   ],
-  "author": "frodwith, joemfb, iamwillkim, tomholford",
+  "author": "frodwith, joemfb, iamwillkim, tomholford, polwex",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/urbit/nockjs/issues"
@@ -26,9 +28,7 @@
   "homepage": "https://github.com/urbit/nockjs#readme",
   "devDependencies": {
     "tape": "^5.6.1",
-    "tape-check": "^1.0.0-rc.0"
-  },
-  "dependencies": {
-    "jsbn": "^1.1.0"
+    "tape-check": "^1.0.0-rc.0",
+    "typescript": "^5.0.4"
   }
 }

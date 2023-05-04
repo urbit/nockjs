@@ -45,7 +45,6 @@ function rub(a, b) {
 
 function cue_in(m, a, b) {
   var c,l,u,v,w,y,p,q,d,x;
-
   if ( zero.equals(bits.cut(zero, b, one, a)) ) {
     x = bits.add(b, one);
     c = rub(x, a);
@@ -79,6 +78,8 @@ function cue_in(m, a, b) {
       q = x;
     }
   }
+  // console.log(p.valueOf(), "old cue result")
+  // console.log(q)
   return new Cell(p, new Cell(q, zero));
 }
 
