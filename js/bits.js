@@ -1,12 +1,13 @@
-import noun from './noun.js';
-import { BigInteger } from 'jsbn';
-var zero = noun.Atom.yes, one  = noun.Atom.no;
+import noun from "./noun.js";
+import { BigInteger } from "jsbn";
+var zero = noun.Atom.yes,
+  one = noun.Atom.no;
 
 // a is native, returns native
 function met(a, b) {
   var bits = b.number.bitLength(),
-      full = bits >>> a,
-      part = (full << a) !== bits;
+    full = bits >>> a,
+    part = full << a !== bits;
 
   return part ? full + 1 : full;
 }
@@ -41,10 +42,9 @@ function bex(a) {
 
 function sub(a, b) {
   var r = a.number.subtract(b.number);
-  if ( r.signum < 0 ) {
+  if (r.signum < 0) {
     throw new Error("subtract underflow");
-  }
-  else {
+  } else {
     return new noun.Atom.Atom(r);
   }
 }
@@ -62,24 +62,24 @@ function rsh(a, b, c) {
 // to/from little-endian 32-bit word array, as used in vere
 // TODO: efficiency is horrible here, but can be improved using internals
 function bytesToWords(bytes) {
-  var len   = bytes.length,
-      trim  = len % 4;
+  var len = bytes.length,
+    trim = len % 4;
   var i, b, w;
 
-	if ( trim > 0 ) {
-    len += (4-trim);
-    for ( i = 0; i < trim; ++i ) {
+  if (trim > 0) {
+    len += 4 - trim;
+    for (i = 0; i < trim; ++i) {
       bytes.push(0);
     }
-	}
+  }
 
   var size = len >> 2;
   var words = new Array(size);
-  for ( i = 0, b = 0; i < size; ++i ) {
-    w =  (bytes[b++] << 0)  & 0x000000FF;
-    w ^= (bytes[b++] << 8)  & 0x0000FF00;
-    w ^= (bytes[b++] << 16) & 0x00FF0000;
-    w ^= (bytes[b++] << 24) & 0xFF000000;
+  for (i = 0, b = 0; i < size; ++i) {
+    w = (bytes[b++] << 0) & 0x000000ff;
+    w ^= (bytes[b++] << 8) & 0x0000ff00;
+    w ^= (bytes[b++] << 16) & 0x00ff0000;
+    w ^= (bytes[b++] << 24) & 0xff000000;
     words[i] = w;
   }
   return words;
@@ -88,27 +88,29 @@ function bytesToWords(bytes) {
 function wordsToBytes(words) {
   var buf = [];
   var w, i, b;
-  for ( i = 0, b = 0; i < words.length; ++i ) {
+  for (i = 0, b = 0; i < words.length; ++i) {
     w = words[i];
-    buf[b++] = 0xff & (w & 0x000000FF);
-    buf[b++] = 0xff & ((w & 0x0000FF00) >>> 8);
-    buf[b++] = 0xff & ((w & 0x00FF0000) >>> 16);
-    buf[b++] = 0xff & ((w & 0xFF000000) >>> 24);
+    buf[b++] = 0xff & (w & 0x000000ff);
+    buf[b++] = 0xff & ((w & 0x0000ff00) >>> 8);
+    buf[b++] = 0xff & ((w & 0x00ff0000) >>> 16);
+    buf[b++] = 0xff & ((w & 0xff000000) >>> 24);
   }
   // or here. one of the 'get rid of extra zeros' functions.
-  while ( buf[--b] === 0 ) {
+  while (buf[--b] === 0) {
     buf.pop();
   }
   return buf;
 }
 
 function bytesToAtom(bytes) {
-  var byt, parts = [];
-  for ( var i = bytes.length - 1; i >= 0; --i ) {
+  var byt,
+    parts = [];
+  for (var i = bytes.length - 1; i >= 0; --i) {
     byt = bytes[i] & 0xff;
-    parts.push(byt < 16 ? ("0" + byt.toString(16)) : byt.toString(16));
+    parts.push(byt < 16 ? "0" + byt.toString(16) : byt.toString(16));
   }
-  return new noun.Atom.Atom(new BigInteger(parts.join(''), 16));
+  const num = new BigInteger(parts.join(""), 16);
+  return new noun.Atom.Atom(num);
 }
 
 function atomToBytes(atom) {
@@ -133,40 +135,49 @@ function slaq(bloq, len) {
 // src is atom, all others native
 function chop(met, fum, wid, tou, dst, src) {
   var buf = atomToWords(src),
-      len = buf.length,
-      i, j, mek, baf, bat, hut, san,
-      wuf, wut, waf, raf, wat, rat, hop;
+    len = buf.length,
+    i,
+    j,
+    mek,
+    baf,
+    bat,
+    hut,
+    san,
+    wuf,
+    wut,
+    waf,
+    raf,
+    wat,
+    rat,
+    hop;
 
-  if ( met < 5 ) {
+  if (met < 5) {
     san = 1 << met;
-    mek = ((1 << san) - 1);
+    mek = (1 << san) - 1;
     baf = fum << met;
     bat = tou << met;
 
-    for ( i = 0; i < wid; ++i ) {
+    for (i = 0; i < wid; ++i) {
       waf = baf >>> 5;
       raf = baf & 31;
       wat = bat >>> 5;
       rat = bat & 31;
-      hop = ((waf >= len) ? 0 : buf[waf]);
-      hop = ((hop >>> raf) & mek);
+      hop = waf >= len ? 0 : buf[waf];
+      hop = (hop >>> raf) & mek;
       dst[wat] ^= hop << rat;
       baf += san;
       bat += san;
     }
-  }
-  else {
+  } else {
     hut = met - 5;
     san = 1 << hut;
 
-    for ( i = 0; i < wid; ++i ) {
+    for (i = 0; i < wid; ++i) {
       wuf = (fum + i) << hut;
       wut = (tou + i) << hut;
 
-      for ( j = 0; j < san; ++j ) {
-        dst[wut + j] ^= ((wuf + j) >= len)
-                      ? 0
-                      : buf[wuf + j];
+      for (j = 0; j < san; ++j) {
+        dst[wut + j] ^= wuf + j >= len ? 0 : buf[wuf + j];
       }
     }
   }
@@ -174,20 +185,22 @@ function chop(met, fum, wid, tou, dst, src) {
 
 function cut(a, b, c, d) {
   var ai = a.number.intValue(),
-      bi = b.number.intValue(),
-      ci = c.number.intValue();
+    bi = b.number.intValue(),
+    ci = c.number.intValue();
 
   var len = met(ai, d);
-  if ( zero.equals(c) || bi >= len ) {
+  if (zero.equals(c) || bi >= len) {
     return zero;
   }
-  if ( bi + ci > len ) {
+  if (bi + ci > len) {
     ci = len - b;
+    console.log(len, "len")
+    console.log(b, "b")
+    console.log(ci, "ci")
   }
-  if ( 0 === bi && ci === len ) {
+  if (0 === bi && ci === len) {
     return d;
-  }
-  else {
+  } else {
     var sal = slaq(ai, ci);
     chop(ai, bi, ci, 0, sal, d);
     return malt(sal);
@@ -198,29 +211,25 @@ var maxCat = noun.Atom.fromInt(0xffffffff);
 var catBits = noun.Atom.fromInt(32);
 
 function end(a, b, c) {
-  if ( gth(a, catBits) ) {
+  if (gth(a, catBits)) {
     throw new Error("Fail");
-  }
-  else if ( gth(b, maxCat) ) {
+  } else if (gth(b, maxCat)) {
     return c;
-  }
-	else {
+  } else {
     var ai = a.number.intValue(),
-        bi = b.number.intValue(),
-       len = met(ai, c);
+      bi = b.number.intValue(),
+      len = met(ai, c);
 
-    if ( 0 === bi ) {
+    if (0 === bi) {
       return zero;
-    }
-    else if ( bi >= len ) {
+    } else if (bi >= len) {
       return c;
-    }
-    else {
+    } else {
       var sal = slaq(ai, bi);
       chop(ai, 0, bi, 0, sal, c);
       return malt(sal);
     }
-	}
+  }
 }
 
 function mix(a, b) {
@@ -228,64 +237,63 @@ function mix(a, b) {
 }
 
 function cat(a, b, c) {
-	if ( gth(a, catBits) ) {
-		throw new Error("Fail");
-	}
-	else {
-		var ai = a.number.intValue(),
-       lew = met(ai, b),
-       ler = met(ai, c),
-       all = lew + ler;
-
-    if ( 0 === all ) {
+  if (gth(a, catBits)) {
+    throw new Error("Fail");
+  } else {
+    var ai = a.number.intValue(),
+      lew = met(ai, b),
+      ler = met(ai, c),
+      all = lew + ler;
+    if (0 === all) {
       return zero;
-    }
-    else {
+    } else {
       var sal = slaq(ai, all);
       chop(ai, 0, lew, 0, sal, b);
       chop(ai, 0, ler, lew, sal, c);
       return malt(sal);
     }
-	}
+  }
 }
 
 function can(a, b) {
-  if ( gth(a, catBits) ) {
+  if (gth(a, catBits)) {
     throw new Error("Fail");
-  }
-  else {
+  } else {
     var ai = a.number.intValue(),
       tot = 0,
       cab = b,
-      pos, i_cab, pi_cab, qi_cab;
+      pos,
+      i_cab,
+      pi_cab,
+      qi_cab;
 
     // measure
-    while ( true ) {
-      if ( zero.equals(cab) ) {
+    while (true) {
+      if (zero.equals(cab)) {
         break;
       }
-      if ( !cab.deep ) {
+      if (!cab.deep) {
         throw new Error("Fail");
       }
       i_cab = cab.head;
-      if ( !i_cab.deep ) {
+      if (!i_cab.deep) {
         throw new Error("Fail");
       }
       pi_cab = i_cab.head;
       qi_cab = i_cab.tail;
-      if ( gth(pi_cab, maxCat) ) {
+      if (gth(pi_cab, maxCat)) {
         throw new Error("Fail");
       }
-      if ( qi_cab.deep ) {
+      if (qi_cab.deep) {
         throw new Error("Fail");
       }
-      if ( (tot + pi_cab) < tot ) {
+      if (tot + pi_cab < tot) {
         throw new Error("Fail");
       }
       tot += pi_cab;
       cab = cab.tail;
     }
-    if ( 0 === tot ) {
+    if (0 === tot) {
       return zero;
     }
     var sal = slaq(ai, tot);
@@ -293,8 +301,8 @@ function can(a, b) {
     // chop the list atoms in
     cab = b;
     pos = 0;
-    while ( !zero.equals(cab) ) {
-      i_cab  = cab.head;
+    while (!zero.equals(cab)) {
+      i_cab = cab.head;
       pi_cab = i_cab.head.number.intValue();
       qi_cab = i_cab.tail;
 
@@ -309,8 +317,8 @@ function can(a, b) {
 export default {
   met: met,
   cut: cut,
-	add: add,
-	sub: sub,
+  add: add,
+  sub: sub,
   dec: dec,
   gth: gth,
   lth: lth,

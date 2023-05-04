@@ -266,6 +266,7 @@ Slog.prototype.toJs = function() {
 
 function compile(formula, subject, product, fresh, constants, block, tail) {
   var op, arg, one, two, odd;
+  console.log(formula, "compiling the fuck")
   if ( !(formula instanceof Cell )) {
     throw new Error("invalid formula");
   }
@@ -409,7 +410,9 @@ function compile(formula, subject, product, fresh, constants, block, tail) {
       two = fresh();
       compile(arg.head, subject, one, fresh, constants, block, false);
       compile(arg.tail, subject, two, fresh, constants, block, false);
-      block.append(new Assignment(product, new Esc(one, two)));
+      const wtf = new Esc(one, two);
+      console.log(wtf, "wtf?")
+      block.append(new Assignment(product, wtf));
       break;
     default:
       throw new Error("invalid opcode");
