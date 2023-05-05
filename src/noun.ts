@@ -53,7 +53,7 @@ class Atom {
         bytes = bigIntToByteArray(this.number);
       for (let i = bytes.length - 1; i >= 0; --i) {
         const c = bytes[i];
-        if (isTa && (c < 32 || c < 127)) {
+        if (isTa && (c < 32 || c > 127)) {
           isTa = false;
           isTas = false;
           break;

@@ -369,10 +369,10 @@ const nine = dwim(9);
 const ten = dwim(10);
 const constant_zero = dwim(1, 0);
 const constant_frag = dwim(0, 1);
-
+type DriverSpec = [name: string, arms: Function | Record<string | number, Function>, children?: DriverSpec[]]
 function collectFromCore(
   prefix: string,
-  spec: any[],
+  spec: DriverSpec,
   out: Record<string, JetDriver[]>
 ) {
   var name = spec[0],
@@ -468,7 +468,7 @@ class Context {
   public yes = new Atom(0n);
   public no = new Atom(1n);
   public drivers: Record<string, JetDriver[]> = {};
-  constructor(drivers?: JetDriver[]) {
+  constructor(drivers?: DriverSpec) {
     if (drivers) collectFromCore("", drivers, this.drivers);
   }
 
@@ -509,8 +509,9 @@ class Context {
     }
     return clue;
   }
-  nock(subject: Noun, formula: Cell<Noun, Noun>): Noun {
+  nock(subject: Noun, formula: Noun): Noun {
     var product, target;
+    if (formula instanceof Atom) throw Error("invalid formula")
     if (!formula.hasOwnProperty("target")) {
       this.compile(formula);
     }
@@ -577,7 +578,7 @@ class Context {
     compile(cell, "subject", "product", fresh, constants, body, true);
     const text = "return function(subject){" + body.toJs() + "return product;}";
     const builder = new Function("context", "constants", text);
-    return (cell as any).target = builder(this, constants);
+    return ((cell as any).target = builder(this, constants));
   }
 }
 function compile(
