@@ -1,4 +1,4 @@
-import { bitLength } from "./bigint.js";
+import { bigIntFromStringWithRadix, bitLength } from "./bigint.js";
 import { Atom, Cell, Noun, atom } from "./noun.js";
 // a is native, returns native
 function met(a: number, b: Atom): number {
@@ -106,8 +106,8 @@ function bytesToAtom(bytes: number[]): Atom {
     byt = bytes[i] & 0xff;
     parts.push(byt < 16 ? "0" + byt.toString(16) : byt.toString(16));
   }
-  const num = parseInt(parts.join(""), 16) || 0
-  return new Atom(BigInt(num));
+  const num = bigIntFromStringWithRadix(parts.join(""), 16);
+  return new Atom(num);
 }
 
 function atomToBytes(atom: Atom) {
@@ -121,6 +121,7 @@ function atomToWords(atom: Atom): number[] {
 function wordsToAtom(words: number[]): Atom {
   return bytesToAtom(wordsToBytes(words));
 }
+// 0x3930b13c0dedeccf01 atom
 
 var malt = wordsToAtom;
 
@@ -300,8 +301,8 @@ function can(a: Atom, b: Noun) {
         pos += pi_cab as number;
         if (cab instanceof Cell) cab = cab.tail;
       }
-      return malt(sal);
     }
+    return malt(sal);
   }
 }
 

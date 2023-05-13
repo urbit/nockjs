@@ -151,9 +151,8 @@ function _jam_in(
 }
 
 function jam(n: Noun): Atom {
-  var x = _jam_in(new NounMap(), n, atom.zero, atom.zero),
+  const x = _jam_in(new NounMap(), n, atom.zero, atom.zero),
     q = list.flop(x.tail.head);
-
   return bits.can(atom.zero, q);
 }
 export { cue, mat, jam };
