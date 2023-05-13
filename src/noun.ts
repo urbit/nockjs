@@ -189,7 +189,7 @@ class Cell<TH extends Noun, TT extends Noun> {
     if (!hasTail) out.push("[");
     this.head.pretty(out, false);
     out.push(" ");
-    this.tail.pretty(out, false);
+    this.tail.pretty(out, true);
     if (!hasTail) out.push("]");
   }
 
@@ -250,7 +250,7 @@ const small = new Array(256);
     small[i] = new Atom(BigInt(i));
   }
 })();
-function fromString(str: string, radix: number): Atom {
+function fromString(str: string, radix: number = 10): Atom {
   const num = bigIntFromStringWithRadix(str, radix);
   return new Atom(num);
 }
