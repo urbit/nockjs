@@ -4,12 +4,9 @@ export function bigIntToByteArray(bigInt: bigint): Int8Array {
   const paddedHexString = hexString.length % 2 === 0 ? hexString : '0' + hexString;
   const arrayLength = paddedHexString.length / 2;
   const int8Array = new Int8Array(arrayLength);
-  // const int8Array = new Int8Array(arrayLength + 1);
-  // int8Array[0] = bigInt >= 0n ? 0 : -1;
   for (let i = 0; i < paddedHexString.length; i += 2) {
     const hexSubstring = paddedHexString.slice(i, i + 2);
     const signedInt = (parseInt(hexSubstring, 16) << 24) >> 24;
-    // int8Array[(i / 2)+ 1] = signedInt;
     int8Array[(i / 2)] = signedInt;
   }
   return int8Array;

@@ -72,7 +72,7 @@ const array = function (item: EnjsFunction): (n: Noun) => Json[] {
     return a;
   };
 };
-// mmm
+
 const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
   return function (noun) {
     let a: Json[] = [];
@@ -134,7 +134,7 @@ const enjs = {
 const dejs = {};
 
 type Atomizable = number | string | Atom;
-// function dwim(n: Noun): Noun;
+
 function dwim(a: number): Atom;
 function dwim(a: string): Atom;
 function dwim(a: Atomizable, b: Atomizable): Cell<Atom, Atom>;
