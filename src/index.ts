@@ -1,3 +1,3 @@
-export * from "./noun.js";
-export * from "./noun-helpers.js"
-export * from "./serial.js"
+export * from "./noun";
+export * from "./noun-helpers"
+export * from "./serial"
