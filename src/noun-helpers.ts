@@ -1,5 +1,5 @@
-import { atom, Atom, Cell } from "./noun.js";
-import type { Noun } from "./noun.js";
+import { atom, Atom, Cell } from "./noun";
+import type { Noun } from "./noun";
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type EnjsFunction = (n: Noun) => Json;

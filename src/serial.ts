@@ -1,8 +1,8 @@
-import { atom, Atom, Cell, Noun } from "./noun.js";
-import { dwim } from "./noun-helpers.js";
-import bits from "./bits.js";
-import list from "./list.js";
-import { NounMap } from "./hamt.js";
+import { atom, Atom, Cell, Noun } from "./noun";
+import { dwim } from "./noun-helpers";
+import bits from "./bits";
+import list from "./list";
+import { NounMap } from "./hamt";
 
 function rub(a: Atom, b: Atom): Cell<Atom, Atom> {
   var c, d, e, w, x, y, z, p, q, m;

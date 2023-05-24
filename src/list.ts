@@ -1,4 +1,4 @@
-import { atom, Atom, Cell, Noun } from "./noun.js";
+import { atom, Atom, Cell, Noun } from "./noun";
 
 function flop(a: Noun): Noun {
   var b: Noun = atom.zero;

@@ -1,5 +1,5 @@
-import { bigIntFromStringWithRadix, bitLength } from "./bigint.js";
-import { Atom, Cell, Noun, atom } from "./noun.js";
+import { bigIntFromStringWithRadix, bitLength } from "./bigint";
+import { Atom, Cell, Noun, atom } from "./noun";
 // a is native, returns native
 function met(a: number, b: Atom): number {
   var bits = bitLength(b.number),

@@ -1,15 +1,20 @@
 {
   "name": "@urbit/nockjs",
   "version": "0.0.2",
-  "description": "javascript urbit runtime",
+  "description": "Javascript urbit runtime",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
+    "start": "dts watch",
+    "build": "dts build",
+    "test": "dts test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/urbit/nockjs.git"
+  },
+  "jest": {
+    "verbose": true
   },
   "keywords": [
     "urbit",
@@ -25,6 +30,7 @@
   "homepage": "https://github.com/urbit/nockjs#readme",
   "devDependencies": {
     "@types/jest": "^29.5.1",
+    "dts-cli": "^2.0.3",
     "jest": "^29.5.0",
     "typescript": "^5.0.4"
   }

@@ -3,7 +3,7 @@ import {
   bigIntToByteArray,
   bitLength,
   testBit,
-} from "./bigint.js";
+} from "./bigint";
 
 // Mug functions
 

@@ -1,8 +1,8 @@
-import { NounMap } from "./hamt.js";
-import { atom, Noun, Atom, Cell } from "./noun.js";
-import { dwim } from "./noun-helpers.js";
-import list from "./list.js";
-import { shortValue } from "./bigint.js";
+import { NounMap } from "./hamt";
+import { atom, Noun, Atom, Cell } from "./noun";
+import { dwim } from "./noun-helpers";
+import list from "./list";
+import { shortValue } from "./bigint";
 
 const MEMO = dwim("memo");
 const SLOG = dwim("slog");

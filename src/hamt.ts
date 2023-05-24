@@ -1,4 +1,4 @@
-import { Noun } from "./noun.js";
+import { Noun } from "./noun";
 
 abstract class Slot {
   abstract insert(key: Noun, val: any, lef: number, rem: number): Slot;
