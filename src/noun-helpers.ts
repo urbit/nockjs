@@ -1,4 +1,4 @@
-import { atom, Atom, Cell } from "./noun";
+import { Atom, Cell } from "./noun";
 import type { Noun } from "./noun";
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
@@ -150,9 +150,9 @@ function dwim(...args: any[]): Noun {
   const n = args.length === 1 ? args[0] : args;
   if (n instanceof Atom || n instanceof Cell) return n;
   if (typeof n === "number") {
-    return atom.fromInt(n);
+    return Atom.fromInt(n);
   } else if (typeof n === "string") {
-    return atom.fromMote(n);
+    return Atom.fromMote(n);
   } else if (Array.isArray(n)) {
     const head = dwim(n[n.length - 2]);
     const tail = dwim(n[n.length - 1]);

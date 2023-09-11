@@ -41,6 +41,13 @@ export const fragCache: Record<string, Function> = {
 class Atom {
   private _mug = 0;
   public deep = false;
+  public static small: Atom[] = (Array.from(Array(256))).map((function (_, i: number) {
+    return new Atom(BigInt(i));
+  }));
+  public static zero = Atom.small[0];
+  public static one = Atom.small[1];
+  public static two = Atom.small[2];
+  public static three = Atom.small[3];
   constructor(public number: bigint) {}
 
   // common methods with Cell
@@ -156,7 +163,7 @@ class Atom {
       : this.number.toString();
   }
   // Class Methods
-  static cordToString = function (c: Atom): string {
+  static cordToString(c: Atom): string {
     const bytes = c.bytes(),
       chars: string[] = [];
 
@@ -166,7 +173,7 @@ class Atom {
     return chars.join("");
   };
   // ??
-  static fragmenter = function (a: Atom): Function {
+  static fragmenter(a: Atom): Function {
     const s = a.shortCode();
     if (fragCache.hasOwnProperty(s)) {
       return fragCache[s];
@@ -180,6 +187,24 @@ class Atom {
       ));
     }
   };
+  // Atom builders
+  static fromString(str: string, radix: number = 10): Atom {
+    const num = bigIntFromStringWithRadix(str, radix);
+    return new Atom(num);
+  }
+  static fromInt(n: number): Atom {
+    if (n < 256) return Atom.small[n];
+    else return new Atom(BigInt(n));
+  }
+  static fromMote(str: string): Atom {
+    let i,
+      j,
+      octs = Array(str.length);
+    for (i = 0, j = octs.length - 1; i < octs.length; ++i, --j) {
+      octs[j] = (str.charCodeAt(i) & 0xff).toString(16);
+    }
+    return new Atom(BigInt(parseInt(octs.join(""), 16)));
+  }
 }
 class Cell<TH extends Noun, TT extends Noun> {
   private _mug = 0;
@@ -242,35 +267,4 @@ class Cell<TH extends Noun, TT extends Noun> {
 }
 type Noun = Atom | Cell<Noun, Noun>;
 
-// Atom builders
-
-const small = new Array(256);
-(function () {
-  for (let i = 0; i < 256; ++i) {
-    small[i] = new Atom(BigInt(i));
-  }
-})();
-function fromString(str: string, radix: number = 10): Atom {
-  const num = bigIntFromStringWithRadix(str, radix);
-  return new Atom(num);
-}
-function fromInt(n: number): Atom {
-  if (n < 256) return small[n];
-  else return new Atom(BigInt(n));
-}
-function fromMote(str: string): Atom {
-  let i,
-    j,
-    octs = Array(str.length);
-  for (i = 0, j = octs.length - 1; i < octs.length; ++i, --j) {
-    octs[j] = (str.charCodeAt(i) & 0xff).toString(16);
-  }
-  return new Atom(BigInt(parseInt(octs.join(""), 16)));
-}
-const zero = fromInt(0);
-const one = fromInt(1);
-const two = fromInt(2);
-const three = fromInt(3);
-const atom = { zero, one, two, three, fromInt, fromString, fromMote };
-
-export { Atom, Cell, Noun, atom };
+export { Atom, Cell, Noun };

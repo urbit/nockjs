@@ -1,5 +1,5 @@
 import { bigIntFromStringWithRadix, bitLength } from "./bigint";
-import { Atom, Cell, Noun, atom } from "./noun";
+import { Atom, Cell, Noun } from "./noun";
 // a is native, returns native
 function met(a: number, b: Atom): number {
   var bits = bitLength(b.number),
@@ -38,7 +38,7 @@ function sub(a: Atom, b: Atom) {
   }
 }
 function dec(a: Atom) {
-  return sub(a, atom.one);
+  return sub(a, Atom.one);
 }
 
 function bex(a: Atom) {
@@ -194,8 +194,8 @@ function cut(a: Atom, b: Atom, c: Atom, d: Atom): Atom {
     ci = Number(c.number);
 
   var len = met(ai, d);
-  if (atom.zero.equals(c) || bi >= len) {
-    return atom.zero;
+  if (Atom.zero.equals(c) || bi >= len) {
+    return Atom.zero;
   }
   if (bi + ci > len) {
     ci = len - Number(b.number); // doublecheck
@@ -209,8 +209,8 @@ function cut(a: Atom, b: Atom, c: Atom, d: Atom): Atom {
   }
 }
 
-const maxCat = atom.fromInt(0xffffffff);
-const catBits = atom.fromInt(32);
+const maxCat = Atom.fromInt(0xffffffff);
+const catBits = Atom.fromInt(32);
 
 function end(a: Atom, b: Atom, c: Atom): Atom {
   if (gth(a, catBits)) {
@@ -223,7 +223,7 @@ function end(a: Atom, b: Atom, c: Atom): Atom {
       len = met(ai, c);
 
     if (0 === bi) {
-      return atom.zero;
+      return Atom.zero;
     } else if (bi >= len) {
       return c;
     } else {
@@ -248,7 +248,7 @@ function cat(a: Atom, b: Atom, c: Atom): Atom {
       ler = met(ai, c),
       all = lew + ler;
     if (0 === all) {
-      return atom.zero;
+      return Atom.zero;
     } else {
       const sal = slaq(ai, all);
       chop(ai, 0, lew, 0, sal, b);
@@ -272,7 +272,7 @@ function can(a: Atom, b: Noun) {
 
     // measure
     while (true) {
-      if (atom.zero.equals(cab)) break;
+      if (Atom.zero.equals(cab)) break;
       if (cab instanceof Atom) throw new Error("Fail");
       i_cab = cab.head;
       if (i_cab instanceof Atom) throw new Error("Fail");
@@ -286,13 +286,13 @@ function can(a: Atom, b: Noun) {
       if (pi_cab instanceof Atom) tot += Number(pi_cab.number);
       if (cab instanceof Cell) cab = cab.tail;
     }
-    if (0 === tot) return atom.zero;
+    if (0 === tot) return Atom.zero;
     var sal = slaq(ai, tot);
 
     // chop the list atoms in
     cab = b;
     pos = 0;
-    while (!atom.zero.equals(cab)) {
+    while (!Atom.zero.equals(cab)) {
       if (cab instanceof Cell) i_cab = cab.head;
       if (i_cab instanceof Cell) {
         if (i_cab.head instanceof Atom) pi_cab = Number(i_cab.head.number);

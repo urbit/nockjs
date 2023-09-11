@@ -1,7 +1,7 @@
 import { jam, cue } from "./serial";
 import bits from "./bits";
 import { dwim } from "./noun-helpers";
-import { atom, Atom, Noun } from "./noun";
+import { Atom, Noun } from "./noun";
 import compiler from "./compiler";
 import { bigIntFromStringWithRadix } from "./bigint";
 import { NounMap } from "./hamt";
@@ -10,13 +10,13 @@ import { NounMap } from "./hamt";
 // bits.js
 test("bits", () => {
   const ok = [...Array(10000)].reduce((acc, a, i) => {
-    const tom = atom.fromInt(i);
+    const tom = Atom.fromInt(i);
     const bytes = bits.atomToBytes(tom);
     const words = bits.atomToWords(tom);
     const bytesToTom = bits.bytesToAtom(bytes);
     const wordsToTom = bits.wordsToAtom(words);
-    const gud = tom.equals(bytesToTom) && tom.equals(wordsToTom) 
-    return gud ? acc : false
+    const gud = tom.equals(bytesToTom) && tom.equals(wordsToTom);
+    return gud ? acc : false;
   }, true)
   expect(ok).toBeTruthy()
 })
@@ -24,7 +24,7 @@ test("bits", () => {
 test("ack", () => {
   const hex =
     "6eca1c00a1bac286c86483dc21dc324164dbf18777e361a371d5186b441bf187fe30f5b1b0bc071d5186b441bf1870028700287bb287d612eb0a1b21920e2aa1b26ce8a1af7086c8648384a86bdc21b21920c00a1e6364278c2598964324180143986482c9abdc21b21920b47a87df8db85d87484cc2e109efc6dc2ec38b4e2c9afc37e30ef8971b2b23c071e8e6c2cdf0168837e30f2643241f213dc21b9421b21920f1097ea13225b85d876266164dc5937bf1b26e2d8b26bf0b8b26eb63616bf818bf0b041";
-  const pill = atom.fromString(hex, 16);
+  const pill = Atom.fromString(hex, 16);
   const formula = cue(pill);
   const woJet = new compiler.Context();
   let jetCalled = false;
@@ -47,7 +47,7 @@ test("ack", () => {
 test("add", () => {
   const hex =
     "829878621bce21b21920c888730c9059367e61cfcc39f98721920f9099110dd6986c86483c425fa84c8886dc2ec3b1330b26e2c9b478d937168f1b26e4e1887ab8e61b213c612cc4b21920fc4dc324164d5912c86483a425c21362dc2ec38b4e2c9ae2b041";
-  const pill = atom.fromString(hex, 16);
+  const pill = Atom.fromString(hex, 16);
   const formula = cue(pill);
   const con = new compiler.Context();
   const randInt = () => Math.floor(Math.random() * 100);
@@ -71,7 +71,7 @@ test("jamming and cueing", () => {
   // examples
   const toJam = [dwim(42), dwim("foo", "bar")];
   const jammed = toJam.map((a) => jam(a));
-  const toCue = [dwim(5456), atom.fromString("1054973063816666730241")];
+  const toCue = [dwim(5456), Atom.fromString("1054973063816666730241")];
   const cued = toCue.map((a) => cue(a));
   const hex =
     "829878621bce21b21920c888730c9059367e61cfcc39f98721920f9099110dd6986c86483c425fa84c8886dc2ec3b1330b26e2c9b478d937168f1b26e4e1887ab8e61b213c612cc4b21920fc4dc324164d5912c86483a425c21362dc2ec38b4e2c9ae2b041";
