@@ -1,13 +1,23 @@
 {
   "name": "@urbit/nockjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Javascript urbit runtime",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "module": "dist/nockjs.esm.js",
   "type": "module",
+  "exports": {
+    "require": "./dist/index.js",
+    "import": "./dist/nockjs.esm.js"
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
     "start": "dts watch",
     "build": "dts build",
-    "test": "dts test"
+    "test": "dts test",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
