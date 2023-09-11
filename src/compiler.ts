@@ -1,5 +1,5 @@
 import { NounMap } from "./hamt";
-import { atom, Noun, Atom, Cell } from "./noun";
+import { Noun, Atom, Cell } from "./noun";
 import { dwim } from "./noun-helpers";
 import list from "./list";
 import { shortValue } from "./bigint";
@@ -620,7 +620,7 @@ function compile(
         compile(c2.head, subject, one, fresh, constants, block, false);
         compile(c2.tail, subject, two, fresh, constants, block, false);
         block.append(
-          new Assignment(product, new Nock(atom.one, atom.two, hasTail))
+          new Assignment(product, new Nock(Atom.one, Atom.two, hasTail))
         );
         break;
       case 3:

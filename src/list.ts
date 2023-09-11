@@ -1,10 +1,10 @@
-import { atom, Atom, Cell, Noun } from "./noun";
+import { Atom, Cell, Noun } from "./noun";
 
 function flop(a: Noun): Noun {
-  var b: Noun = atom.zero;
+  var b: Noun = Atom.zero;
 
   while (true) {
-    if (atom.zero.equals(a)) {
+    if (Atom.zero.equals(a)) {
       return b;
     } else if (a instanceof Atom) {
       throw new Error("Bail");
@@ -17,7 +17,7 @@ function flop(a: Noun): Noun {
 
 function forEach(n: Noun, f: Function): void {
   while (true) {
-    if (atom.zero.equals(n)) {
+    if (Atom.zero.equals(n)) {
       return;
     } else if (n instanceof Atom) {
       throw new Error("Bail");
