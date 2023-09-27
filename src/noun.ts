@@ -196,14 +196,16 @@ class Atom {
     if (n < 256) return Atom.small[n];
     else return new Atom(BigInt(n));
   }
-  static fromMote(str: string): Atom {
+  static fromCord(str: string): Atom {
+    if (str.length === 0) return Atom.zero;
     let i,
       j,
       octs = Array(str.length);
     for (i = 0, j = octs.length - 1; i < octs.length; ++i, --j) {
       octs[j] = (str.charCodeAt(i) & 0xff).toString(16);
     }
-    return new Atom(BigInt(parseInt(octs.join(""), 16)));
+    if (str.length > 4)  return Atom.fromString(octs.join(''), 16);
+    else                 return new Atom(BigInt(parseInt(octs.join(""), 16)));
   }
 }
 class Cell<TH extends Noun, TT extends Noun> {

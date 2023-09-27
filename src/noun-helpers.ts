@@ -152,7 +152,7 @@ function dwim(...args: any[]): Noun {
   if (typeof n === "number") {
     return Atom.fromInt(n);
   } else if (typeof n === "string") {
-    return Atom.fromMote(n);
+    return Atom.fromCord(n);
   } else if (Array.isArray(n)) {
     const head = dwim(n[n.length - 2]);
     const tail = dwim(n[n.length - 1]);
