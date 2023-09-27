@@ -3,13 +3,13 @@
   "version": "1.1.0",
   "description": "Javascript urbit runtime",
   "main": "dist/index.js",
-  "module": "dist/nockjs.esm.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "module": "dist/nockjs.esm.js",
   "exports": {
     "require": "./dist/index.js",
     "import": "./dist/nockjs.esm.js"
   },
-  "types": "dist/index.d.ts",
   "files": [
     "dist/**"
   ],
