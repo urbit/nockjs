@@ -172,7 +172,7 @@ class Atom {
     }
     return chars.join("");
   };
-  // ??
+  // cached tree addressing function constructor
   static fragmenter(a: Atom): Function {
     const s = a.shortCode();
     if (fragCache.hasOwnProperty(s)) {
