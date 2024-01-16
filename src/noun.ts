@@ -48,7 +48,7 @@ class Atom {
   public static one = Atom.small[1];
   public static two = Atom.small[2];
   public static three = Atom.small[3];
-  constructor(public number: bigint) {}
+  constructor(public readonly number: bigint) {}
 
   // common methods with Cell
   pretty(out: string[], hasTail = false): void {
@@ -210,7 +210,7 @@ class Atom {
 }
 class Cell<TH extends Noun, TT extends Noun> {
   private _mug = 0;
-  constructor(public head: TH, public tail: TT, public deep = true) {}
+  constructor(public readonly head: TH, public readonly tail: TT, public deep = true) {}
   // common methods
   pretty(out: string[], hasTail: boolean): void {
     if (!hasTail) out.push("[");
@@ -257,9 +257,11 @@ class Cell<TH extends Noun, TT extends Noun> {
       } else return o.unify(this);
     }
     if (this.head.equals(o.head)) {
+      // @ts-ignore, we are intentionally de-duplicating
       o.head = this.head;
       if (this.tail.equals(o.tail)) {
         o._mug = this._mug;
+        // @ts-ignore, we are intentionally de-duplicating
         o.tail = this.tail;
         return true;
       }
