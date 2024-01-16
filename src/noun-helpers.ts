@@ -135,6 +135,7 @@ const dejs = {};
 
 type Atomizable = number | string | Atom;
 
+// "Do What I Mean"
 function dwim(a: number): Atom;
 function dwim(a: string): Atom;
 function dwim(a: Atomizable, b: Atomizable): Cell<Atom, Atom>;
@@ -154,6 +155,9 @@ function dwim(...args: any[]): Noun {
   } else if (typeof n === "string") {
     return Atom.fromCord(n);
   } else if (Array.isArray(n)) {
+    if (n.length < 2) {
+      return dwim(n[0]);
+    }
     const head = dwim(n[n.length - 2]);
     const tail = dwim(n[n.length - 1]);
     let cel = new Cell(head, tail);
@@ -161,8 +165,12 @@ function dwim(...args: any[]): Noun {
       cel = new Cell(dwim(n[j]), cel);
     }
     return cel;
+  } else if (n === null) {
+    return Atom.zero;
   }
-  console.log("what do you mean??", typeof n, n.toString(), n);
+  //  objects, undefined, etc
+  console.error("what do you mean??", typeof n, JSON.stringify(n));
+  throw new Error('dwim, but meaning unclear');
 }
 
 export { enjs, dejs, dwim };
