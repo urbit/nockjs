@@ -131,7 +131,13 @@ const enjs = {
   bucwut,
   nill,
 };
-const dejs = {};
+
+//
+
+function list(args :any[]): Noun {
+  if (args.length === 0) return Atom.zero;
+  return dwim([...args, Atom.zero]);
+}
 
 type Atomizable = number | string | Atom;
 
@@ -171,6 +177,11 @@ function dwim(...args: any[]): Noun {
   //  objects, undefined, etc
   console.error("what do you mean??", typeof n, JSON.stringify(n));
   throw new Error('dwim, but meaning unclear');
+}
+
+const dejs = {
+  dwim,
+  list,
 }
 
 export { enjs, dejs, dwim };
