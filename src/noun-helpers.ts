@@ -180,6 +180,7 @@ function dwim(...args: any[]): Noun {
 }
 
 const dejs = {
+  nounify: dwim,
   dwim,
   list,
 }
