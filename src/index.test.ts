@@ -1,10 +1,26 @@
 import { jam, cue } from "./serial";
 import bits from "./bits";
 import { dwim } from "./noun-helpers";
-import { Atom, Noun } from "./noun";
+import { Atom, Cell, Noun } from "./noun";
 import compiler from "./compiler";
 import { bigIntFromStringWithRadix } from "./bigint";
 import { NounMap } from "./hamt";
+
+function areNounsEqual(a: unknown, b: unknown): boolean | undefined {
+  const isANoun = a instanceof Atom || a instanceof Cell;
+  const isBNoun = b instanceof Atom || b instanceof Cell;
+
+  if (isANoun && isBNoun) {
+    return a.equals(b);
+  } else if (isANoun === isBNoun) {
+    return undefined;
+  } else {
+    return false;
+  }
+}
+
+//NOTE  for some reason, this function isn't in the ts defs yet
+(expect as any).addEqualityTesters([areNounsEqual]);
 
 //  Follow ports of all tests from frodwith/nockjs in /test folder.
 // bits.js
@@ -35,12 +51,12 @@ test("ack", () => {
   }
   const subject = dwim(2, 2);
   const subject2 = dwim(3, 9)
-  const unjetted =  woJet.nock(subject, formula as any).valueOf();
+  const unjetted = woJet.nock(subject, formula as any);
   const formula2 = cue(pill);
   const withJet = new compiler.Context(["kack", null, [["dec", jet]]] as any);
-  const jetted2 =  withJet.nock(subject2, formula2 as any).valueOf();
-  expect(unjetted).toEqual(7)
-  expect(jetted2).toEqual(4093)
+  const jetted2 = withJet.nock(subject2, formula2 as any);
+  expect(unjetted).toEqual(Atom.fromInt(7))
+  expect(jetted2).toEqual(Atom.fromInt(4093))
   expect(jetCalled).toBeTruthy
 });
 // add.js
@@ -56,7 +72,7 @@ test("add", () => {
       const a = randInt(),
         b = randInt();
       const subject = dwim(a, b);
-      const n = con.nock(subject, formula as any).valueOf();
+      const n = Number((con.nock(subject, formula as any) as Atom).number);
       const j = a + b;
       const nock = [...acc.nock, n];
       const js = [...acc.js, j];
@@ -76,8 +92,8 @@ test("jamming and cueing", () => {
   const hex =
     "829878621bce21b21920c888730c9059367e61cfcc39f98721920f9099110dd6986c86483c425fa84c8886dc2ec3b1330b26e2c9b478d937168f1b26e4e1887ab8e61b213c612cc4b21920fc4dc324164d5912c86483a425c21362dc2ec38b4e2c9ae2b041";
   const addPill = new Atom(bigIntFromStringWithRadix(hex, 16));
-  expect(jammed.valueOf()).toStrictEqual(toCue.valueOf());
-  expect(cued.toString()).toStrictEqual(toJam.toString());
+  expect(jammed).toStrictEqual(toCue);
+  expect(cued).toStrictEqual(toJam);
   expect(jam(cue(addPill)).equals(addPill)).toBeTruthy();
   // generative
   let good = true;

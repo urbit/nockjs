@@ -156,12 +156,6 @@ class Atom {
   shortCode() {
     return this.number.toString(36); // can we do more?
   }
-  // TODO should get rid of this tbh
-  valueOf() {
-    return bitLength(this.number) <= 32
-      ? Number(this.number)
-      : this.number.toString();
-  }
   // Class Methods
   static cordToString(c: Atom): string {
     const bytes = c.bytes(),
@@ -178,8 +172,8 @@ class Atom {
     if (fragCache.hasOwnProperty(s)) {
       return fragCache[s];
     } else {
-      for (var parts = ["a"]; !new Atom(1n).equals(a); a = a.mas()) {
-        parts.push(2 === a.cap().valueOf() ? "head" : "tail");
+      for (var parts = ["a"]; !Atom.one.equals(a); a = a.mas()) {
+        parts.push(Atom.two.equals(a.cap()) ? "head" : "tail");
       }
       return (fragCache[s] = new Function(
         "a",

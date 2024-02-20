@@ -1,5 +1,6 @@
 import { Atom, Cell } from "./noun";
 import type { Noun } from "./noun";
+import { bitLength } from "./bigint";
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type EnjsFunction = (n: Noun) => Json;
@@ -102,8 +103,29 @@ const numb = function (atom: Atom): number | string {
   if (!(atom instanceof Atom)) {
     throw new Error("numb: noun not atom");
   }
-  return atom.valueOf();
+  if (bitLength(atom.number) <= 32) {
+    return Number(atom.number);
+  } else {
+    return atom.number.toString();
+  }
 };
+
+const numb32 = function (atom: Atom): number {
+  if (!(atom instanceof Atom)) {
+    throw new Error("numb32: noun not atom");
+  }
+  if (bitLength(atom.number) > 32) {
+    throw new Error("numb32: number too big");
+  }
+  return Number(atom.number);
+}
+
+const numbString = function (atom: Atom): string {
+  if (!(atom instanceof Atom)) {
+    throw new Error("numbString: noun not atom");
+  }
+  return atom.number.toString();
+}
 
 const loob = function (noun: Noun): boolean | void {
   return noun.loob();
@@ -127,6 +149,8 @@ const enjs = {
   tree,
   cord,
   numb,
+  numb32,
+  numbString,
   path,
   bucwut,
   nill,

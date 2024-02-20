@@ -133,7 +133,7 @@ class Frag extends Expression {
   toJs(): string {
     const parts = [this.name];
     for (var ax = this.axis; ax.number > 1n; ax = ax.mas()) {
-      parts.push(ax.cap().valueOf() === 2 ? "head" : "tail");
+      parts.push(Atom.two.equals(ax.cap()) ? "head" : "tail");
     }
     return parts.join(".");
   }
@@ -420,7 +420,7 @@ function parseParentAxis(noun: Noun): Atom {
     return zero;
   } else if (!zero.equals(f.head)) {
     throw new Error("weird formula head");
-  } else if (3 != f.tail.cap().valueOf()) {
+  } else if (!Atom.three.equals(f.tail.cap())) {
     throw new Error("weird parent axis");
   }
   return f.tail;
@@ -600,7 +600,7 @@ function compile(
     compile(arg, subject, two, fresh, constants, block, false);
     block.append(new Assignment(product, new Cons(one, two)));
   } else if (op instanceof Atom)
-    switch (op.valueOf()) {
+    switch (Number(op.number)) {
       case 0:
         const a = arg as Atom;
         // if (0n === a.number) block.append(new Bail());
@@ -673,7 +673,7 @@ function compile(
       case 9:
         const c9 = arg as Cell<Atom, Cell<Noun, Noun>>;
         odd = c9.head;
-        if (2 === odd.cap().valueOf()) {
+        if (Atom.two.equals(odd.cap())) {
           one = fresh();
           two = odd.mas();
           compile(c9.tail, subject, one, fresh, constants, block, false);
