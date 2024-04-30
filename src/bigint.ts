@@ -13,11 +13,47 @@ export function bigIntToByteArray(bigInt: bigint): Int8Array {
 }
 
 
+const testersCoeff: number[] = [];
+const testersBigCoeff: bigint[] = [];
+const testers: bigint[] = [];
+let testersN = 0;
+
 
 export function bitLength(bigIntValue: bigint): number {
   if (bigIntValue === BigInt(0)) return 0;
   //  yes, this is faster than a "raw" bitshift loop
-  return bigIntValue.toString(2).length;
+  // return bigIntValue.toString(2).length;
+
+  // const i = (bigIntValue.toString(16).length - 1) * 4
+  // return i + 32 - Math.clz32(Number(bigIntValue >> BigInt(i)))
+
+  // find upper bound
+  let k = 0
+  while (true) {
+    if (testersN === k) {
+      testersCoeff.push(32 << testersN)
+      testersBigCoeff.push(BigInt(testersCoeff[testersN]))
+      testers.push(1n << testersBigCoeff[testersN])
+      testersN++
+    }
+    if (bigIntValue < testers[k]) break
+    k++
+  }
+
+  if (!k)
+    return 32 - Math.clz32(Number(bigIntValue))
+
+  // determine length by bisection
+  k--
+  let i = testersCoeff[k]
+  let a = bigIntValue >> testersBigCoeff[k]
+  while (k--) {
+    let b = a >> testersBigCoeff[k]
+    if (b)
+      (i += testersCoeff[k], a = b)
+  }
+
+  return i + 32 - Math.clz32(Number(a))
 }
 
 export function testBit(bigIntValue: bigint, index: number): boolean {
