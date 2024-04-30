@@ -1,5 +1,7 @@
 import { bigIntFromStringWithRadix, bitLength } from "./bigint";
 import { Atom, Cell, Noun } from "./noun";
+//TODO  could probably increase performance by not converting bigint -> number
+
 // a is native, returns native
 function met(a: number, b: Atom): number {
   var bits = bitLength(b.number),
@@ -188,10 +190,17 @@ function chop(
     }
   }
 }
+// bloq, start, length, atom
 function cut(a: Atom, b: Atom, c: Atom, d: Atom): Atom {
   var ai = Number(a.number),
     bi = Number(b.number),
     ci = Number(c.number);
+
+  //  this is the common case for cue operations, important to be fast,
+  //  we can just use native operatios for it
+  if (ai === 0) {
+    return new Atom((d.number >> b.number) & ((1n << c.number) - 1n));
+  }
 
   var len = met(ai, d);
   if (Atom.zero.equals(c) || bi >= len) {

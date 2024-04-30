@@ -16,16 +16,8 @@ export function bigIntToByteArray(bigInt: bigint): Int8Array {
 
 export function bitLength(bigIntValue: bigint): number {
   if (bigIntValue === BigInt(0)) return 0;
-
-  let length = 0;
-  let value = bigIntValue;
-
-  while (value !== BigInt(0)) {
-    length++;
-    value >>= BigInt(1); // Right shift the bits by one position
-  }
-
-  return length;
+  //  yes, this is faster than a "raw" bitshift loop
+  return bigIntValue.toString(2).length;
 }
 
 export function testBit(bigIntValue: bigint, index: number): boolean {
@@ -36,6 +28,10 @@ export function shortValue(bigintValue: bigint): number {
   return result >= 2 ** 15 ? result - 2 ** 16 : result;
 }
 export function bigIntFromStringWithRadix(number: string, radix: number): bigint {
+  //  native constructor is slightly faster
+  if (radix === 16) return BigInt('0x' + (number || '0'));
+  if (radix === 10) return BigInt(number || '0');
+
   let result = BigInt(0);
   const base = BigInt(radix);
   const length = number.length;
