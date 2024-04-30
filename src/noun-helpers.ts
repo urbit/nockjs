@@ -9,7 +9,7 @@ type frondOpt = { tag: string; get: EnjsFunction };
 const frond = function (opts: frondOpt[]): EnjsFunction {
   return function (noun) {
     if (!(noun instanceof Cell && noun.head instanceof Atom)) {
-      throw new Error("frond: noun not cell");
+      throw new Error("frond: noun not cell with tag head");
     }
     const tag = Atom.cordToString(noun.head);
     for (let i = 0; i < opts.length; i++) {
@@ -99,32 +99,32 @@ const cord = function (noun: Noun): string {
   return Atom.cordToString(noun);
 };
 
-const numb = function (atom: Atom): number | string {
-  if (!(atom instanceof Atom)) {
+const numb = function (noun: Noun): number | string {
+  if (!(noun instanceof Atom)) {
     throw new Error("numb: noun not atom");
   }
-  if (bitLength(atom.number) <= 32) {
-    return Number(atom.number);
+  if (bitLength(noun.number) <= 32) {
+    return Number(noun.number);
   } else {
-    return atom.number.toString();
+    return noun.number.toString();
   }
 };
 
-const numb32 = function (atom: Atom): number {
-  if (!(atom instanceof Atom)) {
+const numb32 = function (noun: Noun): number {
+  if (!(noun instanceof Atom)) {
     throw new Error("numb32: noun not atom");
   }
-  if (bitLength(atom.number) > 32) {
+  if (bitLength(noun.number) > 32) {
     throw new Error("numb32: number too big");
   }
-  return Number(atom.number);
+  return Number(noun.number);
 }
 
-const numbString = function (atom: Atom): string {
-  if (!(atom instanceof Atom)) {
+const numbString = function (noun: Noun): string {
+  if (!(noun instanceof Atom)) {
     throw new Error("numbString: noun not atom");
   }
-  return atom.number.toString();
+  return noun.number.toString();
 }
 
 const loob = function (noun: Noun): boolean | void {
@@ -158,7 +158,7 @@ const enjs = {
 
 //
 
-function list(args :any[]): Noun {
+function list(args: any[]): Noun {
   if (args.length === 0) return Atom.zero;
   return dwim([...args, Atom.zero]);
 }
