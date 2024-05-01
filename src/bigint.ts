@@ -12,12 +12,51 @@ export function bigIntToByteArray(bigInt: bigint): Int8Array {
   return int8Array;
 }
 
-
+//  bit length cache entries
+const blcCoeff: number[] = [];
+const blcBigCoeff: bigint[] = [];
+const blc: bigint[] = [];
+let blcNext = 0;
 
 export function bitLength(bigIntValue: bigint): number {
-  if (bigIntValue === BigInt(0)) return 0;
-  //  yes, this is faster than a "raw" bitshift loop
-  return bigIntValue.toString(2).length;
+  if (bigIntValue === 0n) return 0;
+
+  //  there is no native bigint bitlength measuring support,
+  //  so we roll our own. this beats toString-based implementations (and those,
+  //  slightly surprisingly, beat manual bitstep loops).
+  //  the approach here is to find *an* upper bound quickly through comparisons,
+  //  in exponentially escalating steps, and then slowly step down the
+  //  comparisons to find the exact result. we get final precision from
+  //  Math.clz32. this approach makes measurements on large bignums way faster.
+  //  https://stackoverflow.com/a/76616288
+
+  //  find upper bound
+  let k = 0
+  while (true) {
+    if (blcNext === k) {
+      blcCoeff.push(32 << blcNext);
+      blcBigCoeff.push(BigInt(blcCoeff[blcNext]));
+      blc.push(1n << blcBigCoeff[blcNext]);
+      blcNext++;
+    }
+    if (bigIntValue < blc[k]) break;
+    k++;
+  }
+
+  //  smallint case
+  if (!k)
+    return 32 - Math.clz32(Number(bigIntValue));
+
+  //  determine exact length by bisection
+  k--;
+  let i = blcCoeff[k];
+  let a = bigIntValue >> blcBigCoeff[k];
+  while (k--) {
+    let b = a >> blcBigCoeff[k];
+    if (b) (i += blcCoeff[k], a = b);
+  }
+
+  return i + 32 - Math.clz32(Number(a));
 }
 
 export function testBit(bigIntValue: bigint, index: number): boolean {
