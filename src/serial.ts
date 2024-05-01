@@ -74,7 +74,6 @@ function cue_in(m: NounMap, a: Atom, b: Atom): Cell<Atom, Cell<Noun, Noun>> {
 }
 
 function cue(a: Atom): Noun {
-  const r = cue_in(new NounMap(), a, Atom.zero);
   return cue_in(new NounMap(), a, Atom.zero).tail.head;
 }
 function mat(a: Atom): Cell<Atom, Atom> {
