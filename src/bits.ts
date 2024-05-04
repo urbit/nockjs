@@ -44,7 +44,7 @@ function dec(a: Atom) {
 }
 
 function bex(a: Atom) {
-  const b = BigInt(1) << a.number;
+  const b = 1n << a.number;
   return new Atom(b);
 }
 
