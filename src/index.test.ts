@@ -170,6 +170,10 @@ test("maps work like maps", () => {
   const atom3 = new Atom(BigInt(num3));
   m.insert(atom1, atom2);
   m.insert(atom3, atom1);
+  if (m.get(atom1) !== atom2)
+    console.log('bad news', { num1, num2, atom1: atom1.number.toString(10), atom2: atom2.number.toString(10) });
+  if (m.get(atom3) !== atom1)
+    console.log('bad news', { num1, num3, atom1: atom1.number.toString(10), atom3: atom3.number.toString(10) });
   expect(m.get(atom1).equals(atom2)).toBeTruthy();
   expect(m.get(atom3).equals(atom1)).toBeTruthy();
 });
