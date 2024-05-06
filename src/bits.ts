@@ -44,7 +44,7 @@ function dec(a: Atom) {
 }
 
 function bex(a: Atom) {
-  const b = BigInt(1) << a.number;
+  const b = 1n << a.number;
   return new Atom(b);
 }
 
@@ -192,15 +192,15 @@ function chop(
 }
 // bloq, start, length, atom
 function cut(a: Atom, b: Atom, c: Atom, d: Atom): Atom {
+  //  this is the common case for cue operations, important to be fast,
+  //  we can just use native operatios for it
+  if (a.number === 0n) {
+    return new Atom((d.number >> b.number) & ((1n << c.number) - 1n));
+  }
+
   var ai = Number(a.number),
     bi = Number(b.number),
     ci = Number(c.number);
-
-  //  this is the common case for cue operations, important to be fast,
-  //  we can just use native operatios for it
-  if (ai === 0) {
-    return new Atom((d.number >> b.number) & ((1n << c.number) - 1n));
-  }
 
   var len = met(ai, d);
   if (Atom.zero.equals(c) || bi >= len) {
