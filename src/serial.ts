@@ -36,6 +36,7 @@ function dv_bit(b: number, d: DataView): number {
 
 function dv_bitLength(d: DataView): number {
   const l = d.byteLength - 1;
+  if (l > (2**49)) throw new Error('bail: oversized byte buffer'); //REVIEW
   return (l * 8) + d.getUint8(l).toString(2).length;
 }
 
