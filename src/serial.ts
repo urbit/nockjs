@@ -6,11 +6,12 @@ import { NounMap } from "./hamt";
 import { bigIntFromStringWithRadix, bigIntToByteArray } from "./bigint";
 
 function bytesToBigint(bytes: number[]): bigint {
+  if (bytes.length === 1) return BigInt(bytes[0]);
   let byt: number,
     parts: string[] = [];
   for (var i = bytes.length - 1; i >= 0; --i) {
     byt = bytes[i] & 0xff;
-    parts.push(byt < 16 ? "0" + byt.toString(16) : byt.toString(16));
+    parts.push(byt.toString(16).padStart(2, '0'));
   }
   const num = bigIntFromStringWithRadix(parts.join(""), 16);
   return num;
