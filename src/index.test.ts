@@ -1,4 +1,4 @@
-import { jam, cue, bigintToDataView, bi_cut } from "./serial";
+import { jam, cue, cue_bytes, bigintToDataView, bi_cut } from "./serial";
 import bits from "./bits";
 import { dwim } from "./noun-helpers";
 import { Atom, Cell, Noun } from "./noun";
