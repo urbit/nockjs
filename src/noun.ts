@@ -236,7 +236,7 @@ class Cell<TH extends Noun, TT extends Noun> {
   bump(): void {
     throw new Error("Bail");
   }
-  loob(): void {
+  loob(): boolean {
     throw new Error("Bail");
   }
   at(a: Atom): Cell<Noun, Noun> {

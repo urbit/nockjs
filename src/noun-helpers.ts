@@ -94,7 +94,7 @@ const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
 
 const cord = function (noun: Noun): string {
   if (!(noun instanceof Atom)) {
-    throw new Error("cord: noun not atom");
+    throw new Error(`cord: noun not atom ${noun.toString()}`);
   }
   return Atom.cordToString(noun);
 };
@@ -127,7 +127,7 @@ const numbString = function (noun: Noun): string {
   return noun.number.toString();
 }
 
-const loob = function (noun: Noun): boolean | void {
+const loob = function (noun: Noun): boolean {
   return noun.loob();
 };
 
