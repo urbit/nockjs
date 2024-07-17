@@ -1,6 +1,6 @@
 import { jam, cue, cue_bytes, bigintToDataView, bi_cut } from "./serial";
 import bits from "./bits";
-import { dwim } from "./noun-helpers";
+import { dwim, enjs } from "./noun-helpers";
 import { Atom, Cell, Noun } from "./noun";
 import compiler from "./compiler";
 import { bigIntFromStringWithRadix } from "./bigint";
@@ -250,3 +250,15 @@ test("decrement", () => {
   const product = context.nock(dwim(0), formula);
   expect(product.equals(dwim(42))).toBeTruthy();
 });
+
+test('dwim <-> enjs.cord', () => {
+  const str = `=/  m  (strand ,vase)
+;<  [=ship =desk =case]  bind:m  get-beak
+;<  ~  bind:m
+(poke-our %hood %kiln-merge !>([%example ship %base case %auto]))
+(pure:m !>('success'))`;
+  const atom = dwim(str);
+  const cord = enjs.cord(atom);
+
+  expect(cord).toEqual(str);
+})
