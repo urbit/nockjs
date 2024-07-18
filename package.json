@@ -1,21 +1,28 @@
 {
   "name": "@urbit/nockjs",
-  "version": "1.4.0-dev1",
+  "version": "1.4.0-dev2",
   "description": "Javascript urbit runtime",
   "main": "dist/index.js",
+  "module": "dist/nockjs.esm.mjs",
   "types": "dist/index.d.ts",
-  "type": "module",
-  "module": "dist/nockjs.esm.js",
   "exports": {
-    "require": "./dist/index.js",
-    "import": "./dist/nockjs.esm.js"
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/nockjs.esm.mjs"
+      }
+    }
   },
   "files": [
     "dist/**"
   ],
   "scripts": {
     "start": "dts watch",
-    "build": "dts build",
+    "build": "dts build && cp dist/index.d.ts dist/index.d.mts && cp dist/nockjs.esm.js dist/nockjs.esm.mjs",
     "test": "dts test",
     "prepare": "npm run build"
   },
@@ -40,7 +47,7 @@
   "homepage": "https://github.com/urbit/nockjs#readme",
   "devDependencies": {
     "@types/jest": "^29.5.1",
-    "dts-cli": "^2.0.3",
+    "dts-cli": "^2.0.5",
     "jest": "^29.5.0",
     "typescript": "^5.0.4"
   },
