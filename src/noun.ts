@@ -196,7 +196,8 @@ class Atom {
       j,
       octs = Array(str.length);
     for (i = 0, j = octs.length - 1; i < octs.length; ++i, --j) {
-      octs[j] = (str.charCodeAt(i) & 0xff).toString(16);
+      const charByte = (str.charCodeAt(i) & 0xff).toString(16);
+      octs[j] = charByte.length === 1 ? "0" + charByte : charByte;
     }
     if (str.length > 4)  return Atom.fromString(octs.join(''), 16);
     else                 return new Atom(BigInt(parseInt(octs.join(""), 16)));
