@@ -1,6 +1,6 @@
 {
   "name": "@urbit/nockjs",
-  "version": "1.4.0-dev4",
+  "version": "1.4.0",
   "description": "Javascript urbit runtime",
   "main": "dist/index.js",
   "module": "dist/nockjs.esm.mjs",
@@ -39,7 +39,7 @@
     "js",
     "ts"
   ],
-  "author": "frodwith, joemfb, iamwillkim, tomholford, polwex",
+  "author": "frodwith, joemfb, iamwillkim, tomholford, polwex, palfun-foslup, nocsyx-lassul",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/urbit/nockjs/issues"
