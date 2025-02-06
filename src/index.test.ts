@@ -1,6 +1,7 @@
 import { jam, cue, cue_bytes, bigintToDataView, bi_cut } from "./serial";
 import bits from "./bits";
 import { dwim, enjs } from "./noun-helpers";
+import { putIn, putBy } from "./noun-std";
 import { Atom, Cell, Noun } from "./noun";
 import compiler from "./compiler";
 import { bigIntFromStringWithRadix } from "./bigint";
@@ -261,4 +262,28 @@ test('dwim <-> enjs.cord', () => {
   const cord = enjs.cord(atom);
 
   expect(cord).toEqual(str);
-})
+});
+
+test('putIn', () => {
+  const nums = [1, 2, 3, 3, 3, 4, 5, 6, 7, 7, 7];
+  const ex = [6, [7, [5, 0, 0], 0], 4, [2, [1, 0, 0], 3, 0, 0], 0];
+
+  let set: Noun = Atom.zero;
+  for (let num of nums) {
+    set = putIn(set, Atom.fromInt(num));
+  };
+
+  expect(set.equals(dwim(ex)));
+});
+
+test('putBy', () => {
+  const nums = [[1, 11], [2, 22], [3, 33], [3, 34], [3, 35], [4, 44], [5, 55], [6, 66], [7, 77], [7, 78], [7, 79]];
+  const ex = [[6, 66], [[7, 79], [[5, 55], 0, 0], 0], [4, 44], [[2, 22], [[1, 11], 0, 0], [3, 35], 0, 0], 0];
+
+  let map: Noun = Atom.zero;
+  for (let num of nums) {
+    map = putBy(map, Atom.fromInt(num[0]), Atom.fromInt(num[1]));
+  };
+
+  expect(map.equals(dwim(ex)));
+});

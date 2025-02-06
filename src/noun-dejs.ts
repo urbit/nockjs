@@ -52,4 +52,4 @@ const dejs = {
   list,
 };
 
-export { dejs };
+export { dejs, dwim };
