@@ -7,9 +7,9 @@ export function dor(a: Noun, b: Noun): boolean {
   //  ?:  =(a b)  &
   if (a.equals(b)) return true;
   //  ?.  ?=(@ a)
-  if (a instanceof Cell) {
+  if (a.isCell()) {
     //  ?:  ?=(@ b)  |
-    if (b instanceof Atom) return false;
+    if (b.isAtom()) return false;
     //  ?:  =(-.a -.b)
     if (a.head.equals(b.head))
       //  $(a +.a, b +.b)
@@ -18,7 +18,7 @@ export function dor(a: Noun, b: Noun): boolean {
     return dor(a.head, b.head);
   }
   //  ?.  ?=(@ b)  &
-  if (b instanceof Cell) return true;
+  if (b.isCell()) return true;
   //  (lth a b)
   return (a < b);
 }
@@ -49,6 +49,11 @@ export function mor(a: Noun, b: Noun): boolean {
   return c < d;
 }
 
+//  isSet: check for set with >0 entries, ?=([* * *])
+export function isSet(a: Noun): a is Cell<Noun, Cell<Noun, Noun>> {
+  return a.isCell() && a.tail.isCell();
+}
+
 //  +put:in: set insertion
 export function putIn(a: Noun, b: Noun): Noun {
   //  ?~  a
@@ -56,7 +61,7 @@ export function putIn(a: Noun, b: Noun): Noun {
   if (a.equals(Atom.zero)) {
     return dwim(b, null, null);
   }
-  if (a instanceof Atom || a.tail instanceof Atom) {
+  if (!isSet(a)) {
     throw new Error('malformed set');
   }
   //  ?:  =(b n.a)
@@ -69,7 +74,7 @@ export function putIn(a: Noun, b: Noun): Noun {
     //  =+  c=$(a l.a)
     const c = putIn(a.tail.head, b);
     //  ?>  ?=(^ c)
-    if (c instanceof Atom || c.tail instanceof Atom) {
+    if (!isSet(c)) {
       throw new Error('implementation error');
     }
     //  ?:  (mor n.a n.c)
@@ -83,7 +88,7 @@ export function putIn(a: Noun, b: Noun): Noun {
   //  =+  c=$(a r.a)
   const c = putIn(a.tail.tail, b);
   //  ?>  ?=(^ c)
-  if (c instanceof Atom || c.tail instanceof Atom) {
+  if (!isSet(c)) {
     throw new Error('implementation error');
   }
   //  ?:  (mor n.a n.c)
@@ -95,6 +100,11 @@ export function putIn(a: Noun, b: Noun): Noun {
   return dwim(c.head, [a.head, a.tail.head, c.tail.head], c.tail.tail);
 }
 
+//  isMap: check for map with >0 entries, ?=([[* *] * *])
+export function isMap(a: Noun): a is Cell<Cell<Noun, Noun>, Cell<Noun, Noun>> {
+  return a.isCell() && a.head.isCell() && a.tail.isCell();
+}
+
 //  +put:by: map insertion
 export function putBy(a: Noun, b: Noun, c: Noun): Noun {
   //  ?~  a
@@ -102,7 +112,7 @@ export function putBy(a: Noun, b: Noun, c: Noun): Noun {
   if (a.equals(Atom.zero)) {
     return dwim([b, c], null, null);
   }
-  if (a instanceof Atom || a.head instanceof Atom || a.tail instanceof Atom) {
+  if (!isMap(a)) {
     throw new Error('malformed map');
   }
   //  ?:  =(b p.n.a)
@@ -120,7 +130,7 @@ export function putBy(a: Noun, b: Noun, c: Noun): Noun {
     //  =+  d=$(a l.a)
     const d = putBy(a.tail.head, b, c);
     //  ?>  ?=(^ d)
-    if (d instanceof Atom || d.head instanceof Atom || d.tail instanceof Atom) {
+    if (!isMap(d)) {
       throw new Error('implementation error');
     }
     //  ?:  (mor p.n.a p.n.d)
@@ -134,7 +144,7 @@ export function putBy(a: Noun, b: Noun, c: Noun): Noun {
   //  =+  d=$(a r.a)
   const d = putBy(a.tail.tail, b, c);
   //  ?>  ?=(^ d)
-  if (d instanceof Atom || d.head instanceof Atom || d.tail instanceof Atom) {
+  if (!isMap(d)) {
     throw new Error('implementation error');
   }
   //  ?:  (mor p.n.a p.n.d)

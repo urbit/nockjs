@@ -1,4 +1,4 @@
-import { Atom, Cell } from "./noun";
+import { Atom, Cell, isNoun } from "./noun";
 import type { Noun } from "./noun";
 
 function list(args: any[]): Noun {
@@ -22,7 +22,7 @@ function dwim(...a: any[]): Cell<Noun, Noun>;
 // implementation
 function dwim(...args: any[]): Noun {
   const n = args.length === 1 ? args[0] : args;
-  if (n instanceof Atom || n instanceof Cell) return n;
+  if (isNoun(n)) return n;
   if (typeof n === "number") {
     return Atom.fromInt(n);
   } else if (typeof n === "string") {
