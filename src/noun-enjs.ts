@@ -63,6 +63,23 @@ const bucwut = function (opts: EnjsFunction[]): EnjsFunction {
     throw new Error("bucwut: no matches");
   };
 };
+
+//  buccen: like frond, but without the wrapper object
+const buccen = function (opts: frondOpt[]): EnjsFunction {
+  return function (noun) {
+    if (!(noun instanceof Cell && noun.head instanceof Atom)) {
+      throw new Error("buccen: noun not cell with tag head");
+    }
+    const tag = Atom.cordToString(noun.head);
+    for (let i = 0; i < opts.length; i++) {
+      if (tag === opts[i].tag) {
+        return opts[i].get(noun.tail);
+      }
+    }
+    throw new Error("buccen: unknown tag" + tag);
+  };
+};
+
 const array = function (item: EnjsFunction): (n: Noun) => Json[] {
   return function (noun) {
     let a: Json[] = [];
@@ -152,6 +169,7 @@ const enjs = {
   numb32,
   numbString,
   path,
+  buccen,
   bucwut,
   nill,
 };
