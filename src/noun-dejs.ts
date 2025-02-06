@@ -1,10 +1,8 @@
 import { Atom, Cell, isNoun } from "./noun";
 import type { Noun } from "./noun";
+import { putIn, putBy } from "./noun-std";
 
-function list(args: any[]): Noun {
-  if (args.length === 0) return Atom.zero;
-  return dwim([...args, Atom.zero]);
-}
+//  primitives
 
 type Atomizable = number | string | Atom;
 
@@ -46,10 +44,37 @@ function dwim(...args: any[]): Noun {
   throw new Error('dwim, but meaning unclear');
 }
 
+//  structures
+
+function list(args: any[]): Noun {
+  if (args.length === 0) return Atom.zero;
+  return dwim([...args, Atom.zero]);
+}
+
+function set(args: any[]): Noun {
+  if (args.length === 0) return Atom.zero;
+  let set: Noun = Atom.zero;
+  for (let arg of args) {
+    set = putIn(set, dwim(arg));
+  }
+  return set;
+}
+
+function map(args: {key: any, val: any}[]): Noun {
+  if (args.length === 0) return Atom.zero;
+  let map: Noun = Atom.zero;
+  for (let arg of args) {
+    map = putBy(map, dwim(arg.key), dwim(arg.val));
+  }
+  return map;
+}
+
 const dejs = {
   nounify: dwim,
   dwim,
   list,
+  set,
+  map
 };
 
 export { dejs, dwim };
