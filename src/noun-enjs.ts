@@ -20,6 +20,22 @@ const frond = function (opts: frondOpt[]): EnjsFunction {
     throw new Error("frond: unknown tag" + tag);
   };
 };
+
+const tuple = function(funs: EnjsFunction[]): EnjsFunction {
+  return function (noun) {
+    let o = [];
+    while (noun.isCell()) {
+      o.push(funs[0](noun.head));
+      funs.splice(0, 1);
+      noun = noun.tail;
+    }
+    if (funs.length > 0) {
+      throw new Error("tuple: noun too shallow");
+    }
+    return o;
+  }
+}
+
 type PairCell = { nom: string; get: EnjsFunction };
 const pairs = function (cels: PairCell[]): EnjsFunction {
   return function (noun) {
@@ -37,7 +53,6 @@ const pairs = function (cels: PairCell[]): EnjsFunction {
     return o;
   };
 };
-
 const pair = function (
   na: string,
   ga: EnjsFunction,
@@ -159,6 +174,7 @@ const path = array(cord);
 
 const enjs = {
   frond,
+  tuple,
   pairs,
   pair,
   array,
