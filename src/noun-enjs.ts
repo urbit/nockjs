@@ -24,14 +24,15 @@ const frond = function (opts: frondOpt[]): EnjsFunction {
 const tuple = function(funs: EnjsFunction[]): EnjsFunction {
   return function (noun) {
     let o = [];
-    while (noun.isCell()) {
+    while (funs.length > 1) {
+      if (noun.isAtom()) {
+        throw new Error("tuple: noun too shallow");
+      }
       o.push(funs[0](noun.head));
       funs.splice(0, 1);
       noun = noun.tail;
     }
-    if (funs.length > 0) {
-      throw new Error("tuple: noun too shallow");
-    }
+    o.push(funs[0](noun));
     return o;
   }
 }
