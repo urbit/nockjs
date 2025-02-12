@@ -132,6 +132,15 @@ const cord = function (noun: Noun): string {
   return Atom.cordToString(noun);
 };
 
+const tape = function (noun: Noun): string {
+  return (array(((n: Noun) => {
+    if (n.isCell()) {
+      throw new Error("tape: malformed");
+    }
+    return Atom.cordToString(n);
+  }))(noun)).join();
+}
+
 const numb = function (noun: Noun): number | string {
   if (!(noun instanceof Atom)) {
     throw new Error("numb: noun not atom");
@@ -182,6 +191,7 @@ const enjs = {
   loob,
   tree,
   cord,
+  tape,
   numb,
   numb32,
   numbString,
