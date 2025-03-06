@@ -23,16 +23,17 @@ const frond = function (opts: frondOpt[]): EnjsFunction {
 
 const tuple = function(funs: EnjsFunction[]): EnjsFunction {
   return function (noun) {
+    let i = 0;
     let o = [];
-    while (funs.length > 1) {
+    while (i < funs.length - 1) {
       if (noun.isAtom()) {
         throw new Error("tuple: noun too shallow");
       }
-      o.push(funs[0](noun.head));
-      funs.splice(0, 1);
+      o.push(funs[i](noun.head));
       noun = noun.tail;
+      i++;
     }
-    o.push(funs[0](noun));
+    o.push(funs[i](noun));
     return o;
   }
 }
