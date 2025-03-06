@@ -93,10 +93,11 @@ const buccen = function (opts: frondOpt[]): EnjsFunction {
         return opts[i].get(noun.tail);
       }
     }
-    throw new Error("buccen: unknown tag" + tag);
+    throw new Error("buccen: unknown tag: " + tag);
   };
 };
 
+//  (list *) -> any[]
 const array = function (item: EnjsFunction): (n: Noun) => Json[] {
   return function (noun) {
     let a: Json[] = [];
@@ -108,6 +109,7 @@ const array = function (item: EnjsFunction): (n: Noun) => Json[] {
   };
 };
 
+//  (tree *) -> any[]
 const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
   return function (noun) {
     let a: Json[] = [];
