@@ -28,11 +28,11 @@ export function _mug_both(lef_w: number, rit_w: number): number {
 
 // Helpers
 
-export const fragCache: Record<string, Function> = {
-  "0": function (a: any) {
+export const fragCache: Record<string, (Noun)=>Noun> = {
+  "0": function (a: Noun) {
     throw new Error("Bail");
   },
-  "1": function (a: any) {
+  "1": function (a: Noun) {
     return a;
   },
 };
@@ -117,7 +117,7 @@ class Atom {
   mugged(): boolean {
     return this._mug !== 0;
   }
-  at(a: Atom) {
+  at(a: Atom): Noun {
     return Atom.fragmenter(a)(this);
   }
   // Atom specific methods
@@ -167,7 +167,7 @@ class Atom {
     return chars.join("");
   };
   // cached tree addressing function constructor
-  static fragmenter(a: Atom): Function {
+  static fragmenter(a: Atom): (Noun)=>Noun {
     const s = a.shortCode();
     if (fragCache.hasOwnProperty(s)) {
       return fragCache[s];
@@ -178,7 +178,7 @@ class Atom {
       return (fragCache[s] = new Function(
         "a",
         "return " + parts.join(".") + ";"
-      ));
+      ) as (Noun)=>Noun);
     }
   };
   // Atom builders
@@ -240,7 +240,7 @@ class Cell<TH extends Noun, TT extends Noun> {
   loob(): boolean {
     throw new Error("Bail");
   }
-  at(a: Atom): Cell<Noun, Noun> {
+  at(a: Atom): Noun {
     return Atom.fragmenter(a)(this);
   }
   // Cell specific
