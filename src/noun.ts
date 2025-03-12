@@ -28,7 +28,7 @@ export function _mug_both(lef_w: number, rit_w: number): number {
 
 // Helpers
 
-export const fragCache: Record<string, (Noun)=>Noun> = {
+export const fragCache: Record<string, (arg: Noun) => Noun> = {
   "0": function (a: Noun) {
     throw new Error("Bail");
   },
@@ -169,7 +169,7 @@ class Atom {
     return chars.join("");
   };
   // cached tree addressing function constructor
-  static fragmenter(a: Atom): (Noun)=>Noun {
+  static fragmenter(a: Atom): (arg: Noun) => Noun {
     const s = a.shortCode();
     if (fragCache.hasOwnProperty(s)) {
       return fragCache[s];
@@ -180,7 +180,7 @@ class Atom {
       return (fragCache[s] = new Function(
         "a",
         "return " + parts.join(".") + ";"
-      ) as (Noun)=>Noun);
+      ) as (arg: Noun) => Noun);
     }
   };
   // Atom builders
