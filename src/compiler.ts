@@ -544,6 +544,7 @@ class Context {
           );
         } else {
           const parentCore = core.at(clue.parentAxis),
+            // @ts-ignore TODO: cleanup
             parentBattery = parentCore.head,
             parentLoc = this.dash.get(parentBattery);
           if (undefined === parentLoc) {

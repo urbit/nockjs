@@ -53,7 +53,7 @@ test("ack", () => {
   const getSample = Atom.fragmenter(dwim(6))
   const jet = (core: Noun) => {
     jetCalled = true;
-    return bits.dec(getSample(core));
+    return bits.dec(getSample(core) as Atom);
   }
   const subject = dwim(2, 2);
   const subject2 = dwim(3, 9)
