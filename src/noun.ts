@@ -51,6 +51,8 @@ class Atom {
   constructor(public readonly number: bigint) {}
 
   // common methods with Cell
+  isAtom(): this is Atom             { return true; }
+  isCell(): this is Cell<Noun, Noun> { return false; }
   pretty(out: string[], hasTail = false): void {
     if (this.number < 65536n) out.push(this.number.toString(10));
     else {
@@ -207,6 +209,8 @@ class Cell<TH extends Noun, TT extends Noun> {
   private _mug = 0;
   constructor(public readonly head: TH, public readonly tail: TT, public deep = true) {}
   // common methods
+  isAtom(): this is Atom         { return false; }
+  isCell(): this is Cell<TH, TT> { return true; }
   pretty(out: string[], hasTail: boolean): void {
     if (!hasTail) out.push("[");
     this.head.pretty(out, false);
@@ -265,5 +269,15 @@ class Cell<TH extends Noun, TT extends Noun> {
   }
 }
 type Noun = Atom | Cell<Noun, Noun>;
+
+export function isAtom(a: any): a is Atom {
+  return a instanceof Atom;
+}
+export function isCell(a: any): a is Cell<Noun, Noun> {
+  return a instanceof Cell;
+}
+export function isNoun(a: any): a is Noun {
+  return isAtom(a) || isCell(a);
+}
 
 export { Atom, Cell, Noun };
