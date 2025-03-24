@@ -23,6 +23,8 @@ function dwim(...args: any[]): Noun {
   if (isNoun(n)) return n;
   if (typeof n === "number") {
     return Atom.fromInt(n);
+  } else if (typeof n === "bigint") {
+    return new Atom(n);
   } else if (typeof n === "string") {
     return Atom.fromCord(n);
   } else if (Array.isArray(n)) {
