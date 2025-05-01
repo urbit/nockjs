@@ -112,19 +112,17 @@ const array = function (item: EnjsFunction): (n: Noun) => Json[] {
 //  (tree *) -> any[]
 const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
   return function (noun) {
-    let a: Json[] = [];
     if (noun instanceof Cell) {
       if (!(noun.tail instanceof Cell)) {
         throw new Error("tree: malformed");
       }
-      a = [
-        ...a,
+      return [
+        ...tree(item)(noun.tail.tail),
         item(noun.head),
         ...tree(item)(noun.tail.head),
-        ...tree(item)(noun.tail.tail),
       ];
     }
-    return a;
+    return [];
   };
 };
 

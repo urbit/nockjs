@@ -101,9 +101,8 @@ test('tree', () => {
   expectEnjs<number[]>(dwim(1, 0, 0), f, [1]);
 
   // many items noun set
-  //NOTE  exact output order depends on implementation details
   const nums = [1, 2, 3, 4, 5, 6, 7];
-  const ex = [6, 7, 4, 5, 2, 1, 3];
+  const ex = [4, 3, 2, 1, 6, 7, 5];  //  matches ~(tap in s) order
   let set: Noun = Atom.zero;
   for (let num of nums) {
     set = putIn(set, Atom.fromInt(num));
