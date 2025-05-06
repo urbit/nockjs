@@ -4,27 +4,7 @@ import {
   bitLength,
   testBit,
 } from "./bigint";
-
-// Mug functions
-
-export function _mug_fnv(has_w: number): number {
-  return Math.imul(has_w, 16777619);
-}
-
-export function _mug_out(has_w: number): number {
-  return (has_w >>> 31) ^ (has_w & 0x7fffffff);
-}
-
-export function _mug_both(lef_w: number, rit_w: number): number {
-  var bot_w = _mug_fnv(lef_w ^ _mug_fnv(rit_w));
-  var out_w = _mug_out(bot_w);
-
-  if (0 != out_w) {
-    return out_w;
-  } else {
-    return _mug_both(lef_w, ++rit_w);
-  }
-}
+import { mum } from "./noun-std";
 
 // Helpers
 
@@ -104,17 +84,7 @@ class Atom {
     return this._mug;
   }
   calculateMug(): number {
-    const a = bigIntToByteArray(this.number);
-    let b: number, c: number, d: number, e: number, f: number, bot: number;
-    for (e = a.length - 1, b = 2166136261 | 0; ; ++b) {
-      c = b;
-      bot = 0 === a[0] ? 1 : 0;
-      for (d = e; d >= bot; --d) {
-        c = _mug_fnv(c ^ (0xff & a[d]));
-      }
-      f = _mug_out(c);
-      if (0 !== f) return f;
-    }
+    return mum(0xcafebabe, 0x7fff, this.number);
   }
   mugged(): boolean {
     return this._mug !== 0;
@@ -229,7 +199,8 @@ class Cell<TH extends Noun, TT extends Noun> {
     return this._mug;
   }
   calculateMug(): number {
-    return _mug_both(this.head.mug(), this.tail.mug());
+    return mum(0xdeadbeef, 0xfffe,
+               ((BigInt(this.tail.mug()) << 32n) | BigInt(this.head.mug())));
   }
   mugged(): boolean {
     return this._mug !== 0;

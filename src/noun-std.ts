@@ -1,6 +1,34 @@
+import { murmurhash3_bi } from "./murmur3";
 import { Atom, Cell } from "./noun";
 import type { Noun } from "./noun";
 import { dwim } from "./noun-dejs";
+
+//
+//  mugs
+//
+
+export function mug(arg: Noun): number {
+  return arg.mug();
+}
+
+export function mum(syd: number, fal: number, key: bigint): number {
+  let i = 0;
+  while (i < 8) {
+    const haz = murmurhash3_bi(null, key, syd);
+    const ham = (haz >>> 31) ^ (haz & 0x7fffffff);
+    if (0 !== ham) return ham;
+    i++; syd++;
+  }
+  return fal;
+}
+
+export function muk(syd: number, len: number, key: bigint): number {
+  return murmurhash3_bi(len, key, syd);
+};
+
+//
+//  ordering
+//
 
 //  +dor: depth order
 export function dor(a: Noun, b: Noun): boolean {
@@ -48,6 +76,10 @@ export function mor(a: Noun, b: Noun): boolean {
   //  (lth c d)
   return c < d;
 }
+
+//
+//  data structures
+//
 
 //  isSet: check for set with >0 entries, ?=([* * *])
 export function isSet(a: Noun): a is Cell<Noun, Cell<Noun, Noun>> {
