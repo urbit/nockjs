@@ -355,9 +355,9 @@ class Location {
 // Context Helpers
 
 function chum(n: Noun) {
-  if (n instanceof Cell && n.head instanceof Atom && n.tail instanceof Atom) {
+  if (n.isCell() && n.head.isAtom() && n.tail.isAtom()) {
     return Atom.cordToString(n.head) + shortValue(n.tail.number).toString(10);
-  } else if (n instanceof Atom) {
+  } else if (n.isAtom()) {
     return Atom.cordToString(n);
   } else throw new Error("wrong noun input to chum");
 }
@@ -403,7 +403,7 @@ function collectFromCore(
 
 function skipHints(formula: Noun) {
   while (true) {
-    if (formula instanceof Cell) {
+    if (formula.isCell()) {
       if (ten.equals(formula.head)) {
         const f = formula as Cell<Noun, Cell<Noun, Noun>>;
         formula = f.tail.tail;
@@ -429,14 +429,14 @@ function parseParentAxis(noun: Noun): Atom {
 function parseHookAxis(nock: Noun): Noun | null {
   const f = skipHints(nock) as Cell<Noun, Noun>,
     op = f.head;
-  if (op instanceof Atom) {
+  if (op.isAtom()) {
     if (zero.equals(op)) {
       if (!f.tail.deep) {
         return f.tail;
       }
     } else if (nine.equals(op)) {
       const rest = f.tail as Cell<Noun, Noun>;
-      if (rest.head instanceof Atom && constant_frag.equals(rest.tail)) {
+      if (rest.head.isAtom() && constant_frag.equals(rest.tail)) {
         return rest.head;
       }
     }
@@ -491,7 +491,7 @@ class Context {
     this.tax = new Cell(item, this.tax);
   }
   stackPop() {
-    if (this.tax instanceof Cell) this.tax = this.tax.tail;
+    if (this.tax.isCell()) this.tax = this.tax.tail;
     // TODO else throw error?
   }
   slog(item: any) {
@@ -511,7 +511,7 @@ class Context {
   }
   nock(subject: Noun, formula: Noun): Noun {
     var product, target;
-    if (formula instanceof Atom) throw Error("invalid formula")
+    if (formula.isAtom()) throw Error("invalid formula")
     if (!formula.hasOwnProperty("target")) {
       this.compile(formula);
     }
@@ -594,13 +594,13 @@ function compile(
   var op, arg, one, two, odd;
   op = formula.head;
   arg = formula.tail;
-  if (op instanceof Cell && arg instanceof Cell) {
+  if (op.isCell() && arg.isCell()) {
     one = fresh();
     two = fresh();
     compile(op, subject, one, fresh, constants, block, false);
     compile(arg, subject, two, fresh, constants, block, false);
     block.append(new Assignment(product, new Cons(one, two)));
-  } else if (op instanceof Atom)
+  } else if (op.isAtom())
     switch (Number(op.number)) {
       case 0:
         const a = arg as Atom;
@@ -693,7 +693,7 @@ function compile(
         break;
       case 10:
         const c10 = arg as Cell<Cell<Noun, Noun>, Cell<Noun, Noun>>;
-        if (!(c10.head instanceof Cell)) {
+        if (!(c10.head.isCell())) {
           // no recognized static hints
           compile(c10.tail, subject, product, fresh, constants, block, hasTail);
         } else {

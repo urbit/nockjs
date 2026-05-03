@@ -282,18 +282,18 @@ function can(a: Atom, b: Noun) {
     // measure
     while (true) {
       if (Atom.zero.equals(cab)) break;
-      if (cab instanceof Atom) throw new Error("Fail");
+      if (cab.isAtom()) throw new Error("Fail");
       i_cab = cab.head;
-      if (i_cab instanceof Atom) throw new Error("Fail");
-      else if (i_cab instanceof Cell) {
+      if (i_cab.isAtom()) throw new Error("Fail");
+      else if (i_cab.isCell()) {
         pi_cab = i_cab.head;
         qi_cab = i_cab.tail;
       }
-      if (pi_cab instanceof Atom && gth(pi_cab, maxCat))
+      if (pi_cab.isAtom() && gth(pi_cab, maxCat))
         throw new Error("Fail");
-      if (qi_cab instanceof Cell) throw new Error("Fail");
-      if (pi_cab instanceof Atom) tot += Number(pi_cab.number);
-      if (cab instanceof Cell) cab = cab.tail;
+      if (qi_cab.isCell()) throw new Error("Fail");
+      if (pi_cab.isAtom()) tot += Number(pi_cab.number);
+      if (cab.isCell()) cab = cab.tail;
     }
     if (0 === tot) return Atom.zero;
     var sal = slaq(ai, tot);
@@ -302,13 +302,13 @@ function can(a: Atom, b: Noun) {
     cab = b;
     pos = 0;
     while (!Atom.zero.equals(cab)) {
-      if (cab instanceof Cell) i_cab = cab.head;
-      if (i_cab instanceof Cell) {
-        if (i_cab.head instanceof Atom) pi_cab = Number(i_cab.head.number);
+      if (cab.isCell()) i_cab = cab.head;
+      if (i_cab.isCell()) {
+        if (i_cab.head.isAtom()) pi_cab = Number(i_cab.head.number);
         qi_cab = i_cab.tail;
         chop(ai, 0, pi_cab as number, pos, sal, qi_cab as Atom);
         pos += pi_cab as number;
-        if (cab instanceof Cell) cab = cab.tail;
+        if (cab.isCell()) cab = cab.tail;
       }
     }
     return malt(sal);

@@ -1,4 +1,4 @@
-import { Atom } from "./noun";
+import { Atom, isNoun } from "./noun";
 import { dwim } from "./noun-dejs";
 import { gor, mug, muk, mum } from "./noun-std";
 
@@ -33,3 +33,14 @@ test('gor', () => {
   expect(gor(Atom.one, Atom.zero)).toBeTruthy();
   expect(gor(Atom.zero, dwim(Atom.zero, Atom.zero))).toBeFalsy();
 });
+
+test('isNoun', () => {
+  expect(isNoun(null)).toBeFalsy();
+  expect(isNoun(undefined)).toBeFalsy();
+  expect(isNoun(1)).toBeFalsy();
+  expect(isNoun('a')).toBeFalsy();
+  expect(isNoun(['a', 'b'])).toBeFalsy();
+  expect(isNoun({ a: 'b' })).toBeFalsy();
+  expect(isNoun(Atom.zero)).toBeTruthy();
+  expect(isNoun(dwim(1, 2))).toBeTruthy();
+})

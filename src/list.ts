@@ -6,7 +6,7 @@ function flop(a: Noun): Noun {
   while (true) {
     if (Atom.zero.equals(a)) {
       return b;
-    } else if (a instanceof Atom) {
+    } else if (a.isAtom()) {
       throw new Error("Bail");
     } else {
       b = new Cell(a.head, b);
@@ -19,7 +19,7 @@ function forEach(n: Noun, f: Function): void {
   while (true) {
     if (Atom.zero.equals(n)) {
       return;
-    } else if (n instanceof Atom) {
+    } else if (n.isAtom()) {
       throw new Error("Bail");
     } else {
       f(n.head);
