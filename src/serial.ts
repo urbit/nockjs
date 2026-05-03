@@ -253,7 +253,7 @@ function _jam_in(
     return a instanceof Cell
       ? _jam_in_pair(m, a.head, a.tail, b, l)
       : _jam_in_flat(a, l);
-  } else if (a instanceof Atom && bits.met(0, a) <= bits.met(0, c)) {
+  } else if (a.isAtom() && bits.met(0, a) <= bits.met(0, c)) {
     return _jam_in_flat(a, l);
   } else {
     return _jam_in_ptr(c, l);

@@ -72,7 +72,7 @@ class Atom {
     return parts.join("");
   }
   equals(o: Noun): boolean {
-    return o instanceof Atom && o.number === this.number;
+    return o.isAtom() && o.number === this.number;
   }
   loob(): boolean {
     if (Number(this.number) === 0) return true;
@@ -242,10 +242,10 @@ class Cell<TH extends Noun, TT extends Noun> {
 type Noun = Atom | Cell<Noun, Noun>;
 
 export function isAtom(a: any): a is Atom {
-  return a instanceof Atom;
+  return a && a.isAtom && a.isAtom();
 }
 export function isCell(a: any): a is Cell<Noun, Noun> {
-  return a instanceof Cell;
+  return a && a.isCell && a.isCell();
 }
 export function isNoun(a: any): a is Noun {
   return isAtom(a) || isCell(a);

@@ -8,7 +8,7 @@ type frondOpt = { tag: string; get: EnjsFunction };
 
 const frond = function (opts: frondOpt[]): EnjsFunction {
   return function (noun) {
-    if (!(noun instanceof Cell && noun.head instanceof Atom)) {
+    if (!(noun.isCell() && noun.head.isAtom())) {
       throw new Error("frond: noun not cell with tag head");
     }
     const tag = Atom.cordToString(noun.head);
@@ -84,7 +84,7 @@ const bucwut = function (opts: EnjsFunction[]): EnjsFunction {
 //  buccen: like frond, but without the wrapper object
 const buccen = function (opts: frondOpt[]): EnjsFunction {
   return function (noun) {
-    if (!(noun instanceof Cell && noun.head instanceof Atom)) {
+    if (!(noun instanceof Cell && noun.head.isAtom())) {
       throw new Error("buccen: noun not cell with tag head");
     }
     const tag = Atom.cordToString(noun.head);
@@ -127,7 +127,7 @@ const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
 };
 
 const cord = function (noun: Noun): string {
-  if (!(noun instanceof Atom)) {
+  if (!(noun.isAtom())) {
     throw new Error(`cord: noun not atom ${noun.toString()}`);
   }
   return Atom.cordToString(noun);
@@ -143,7 +143,7 @@ const tape = function (noun: Noun): string {
 }
 
 const numb = function (noun: Noun): number | string {
-  if (!(noun instanceof Atom)) {
+  if (!(noun.isAtom())) {
     throw new Error("numb: noun not atom");
   }
   if (bitLength(noun.number) <= 32) {
@@ -154,7 +154,7 @@ const numb = function (noun: Noun): number | string {
 };
 
 const numb32 = function (noun: Noun): number {
-  if (!(noun instanceof Atom)) {
+  if (!(noun.isAtom())) {
     throw new Error("numb32: noun not atom");
   }
   if (bitLength(noun.number) > 32) {
@@ -164,7 +164,7 @@ const numb32 = function (noun: Noun): number {
 }
 
 const numbString = function (noun: Noun): string {
-  if (!(noun instanceof Atom)) {
+  if (!(noun.isAtom())) {
     throw new Error("numbString: noun not atom");
   }
   return noun.number.toString();
@@ -175,7 +175,7 @@ const loob = function (noun: Noun): boolean {
 };
 
 const nill = function (noun: Noun): null {
-  if (!(noun instanceof Atom && noun.number === 0n)) {
+  if (!(noun.isAtom() && noun.number === 0n)) {
     throw new Error("nill: not null");
   }
   return null;
