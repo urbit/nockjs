@@ -207,7 +207,7 @@ class Cell<TH extends Noun, TT extends Noun> {
     return this._mug !== 0;
   }
   equals(o: Noun): boolean {
-    if (o instanceof Cell) return this.unify(o);
+    if (o.isCell()) return this.unify(o);
     else return false;
   }
   bump(): void {

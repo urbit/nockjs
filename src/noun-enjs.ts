@@ -45,7 +45,7 @@ function pairs<T>(cels: PairCell<T>[]): EnjsFunction<Record<string, T>> {
     let i = 0;
     let o: Record<string, T> = {};
     while (i < cels.length - 1) {
-      if (!(noun instanceof Cell)) {
+      if (noun.isAtom()) {
         throw new Error("pairs: noun too shallow");
       }
       o[cels[i].nom] = cels[i].get(noun.head);
@@ -86,7 +86,7 @@ function bucwut<T>(opts: EnjsFunction<T>[]): EnjsFunction<T> {  //TODO  how usef
 //  buccen: like frond, but without the wrapper object
 function buccen<T>(opts: frondOpt<T>[]): EnjsFunction<T> {  //TODO  how useful is the genericity here?
   return function (noun) {
-    if (!(noun instanceof Cell && noun.head.isAtom())) {
+    if (!(noun.isCell() && noun.head.isAtom())) {
       throw new Error("buccen: noun not cell with tag head");
     }
     const tag = Atom.cordToString(noun.head);
@@ -103,7 +103,7 @@ function buccen<T>(opts: frondOpt<T>[]): EnjsFunction<T> {  //TODO  how useful i
 function array<T>(item: EnjsFunction<T>): EnjsFunction<T[]> {
   return function (noun) {
     let a: T[] = [];
-    while (noun instanceof Cell) {
+    while (noun.isCell()) {
       a.push(item(noun.head));
       noun = noun.tail;
     }
@@ -114,8 +114,8 @@ function array<T>(item: EnjsFunction<T>): EnjsFunction<T[]> {
 //  (tree *) -> any[]
 function tree<T>(item: EnjsFunction<T>): EnjsFunction<T[]> {
   return function (noun) {
-    if (noun instanceof Cell) {
-      if (!(noun.tail instanceof Cell)) {
+    if (noun.isCell()) {
+      if (noun.tail.isAtom()) {
         throw new Error("tree: malformed");
       }
       return [

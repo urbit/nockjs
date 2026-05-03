@@ -403,7 +403,7 @@ function collectFromCore(
 
 function skipHints(formula: Noun) {
   while (true) {
-    if (formula instanceof Cell) {
+    if (formula.isCell()) {
       if (ten.equals(formula.head)) {
         const f = formula as Cell<Noun, Cell<Noun, Noun>>;
         formula = f.tail.tail;
@@ -491,7 +491,7 @@ class Context {
     this.tax = new Cell(item, this.tax);
   }
   stackPop() {
-    if (this.tax instanceof Cell) this.tax = this.tax.tail;
+    if (this.tax.isCell()) this.tax = this.tax.tail;
     // TODO else throw error?
   }
   slog(item: any) {
@@ -594,7 +594,7 @@ function compile(
   var op, arg, one, two, odd;
   op = formula.head;
   arg = formula.tail;
-  if (op instanceof Cell && arg instanceof Cell) {
+  if (op.isCell() && arg.isCell()) {
     one = fresh();
     two = fresh();
     compile(op, subject, one, fresh, constants, block, false);
@@ -693,7 +693,7 @@ function compile(
         break;
       case 10:
         const c10 = arg as Cell<Cell<Noun, Noun>, Cell<Noun, Noun>>;
-        if (!(c10.head instanceof Cell)) {
+        if (!(c10.head.isCell())) {
           // no recognized static hints
           compile(c10.tail, subject, product, fresh, constants, block, hasTail);
         } else {
