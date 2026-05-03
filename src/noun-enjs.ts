@@ -2,11 +2,12 @@ import { Atom, Cell } from "./noun";
 import type { Noun } from "./noun";
 import { bitLength } from "./bigint";
 
-type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
-export type EnjsFunction = (n: Noun) => Json;
-type frondOpt = { tag: string; get: EnjsFunction };
+export type EnjsFunction<T> = (n: Noun) => T;
+type frondOpt<T> = { tag: string; get: EnjsFunction<T> };
 
-const frond = function (opts: frondOpt[]): EnjsFunction {
+//TODO  support generics, ie frondOpt<T>, enjsfunction<T>, etc
+
+function frond<T>(opts: frondOpt<T>[]): EnjsFunction<{[key: string]: T}> {  //TODO  how useful is the genericity here?
   return function (noun) {
     if (!(noun.isCell() && noun.head.isAtom())) {
       throw new Error("frond: noun not cell with tag head");
@@ -21,7 +22,7 @@ const frond = function (opts: frondOpt[]): EnjsFunction {
   };
 };
 
-const tuple = function(funs: EnjsFunction[]): EnjsFunction {
+function tuple<T>(funs: EnjsFunction<T>[]): EnjsFunction<T[]> {  //TODO  how useful is the genericity here?
   return function (noun) {
     let i = 0;
     let o = [];
@@ -38,11 +39,11 @@ const tuple = function(funs: EnjsFunction[]): EnjsFunction {
   }
 }
 
-type PairCell = { nom: string; get: EnjsFunction };
-const pairs = function (cels: PairCell[]): EnjsFunction {
+type PairCell<T> = { nom: string; get: EnjsFunction<T> };  //TODO  how useful is the genericity here?
+function pairs<T>(cels: PairCell<T>[]): EnjsFunction<Record<string, T>> {
   return function (noun) {
     let i = 0;
-    let o: Record<string, Json> = {};
+    let o: Record<string, T> = {};
     while (i < cels.length - 1) {
       if (!(noun instanceof Cell)) {
         throw new Error("pairs: noun too shallow");
@@ -55,19 +56,19 @@ const pairs = function (cels: PairCell[]): EnjsFunction {
     return o;
   };
 };
-const pair = function (
+function pair<T>(  //TODO  how useful is the genericity here?
   na: string,
-  ga: EnjsFunction,
+  ga: EnjsFunction<T>,
   nb: string,
-  gb: EnjsFunction
-): EnjsFunction {
+  gb: EnjsFunction<T>
+): EnjsFunction<Record<string,T>> {
   return pairs([
     { nom: na, get: ga },
     { nom: nb, get: gb },
   ]);
 };
 
-const bucwut = function (opts: EnjsFunction[]): EnjsFunction {
+function bucwut<T>(opts: EnjsFunction<T>[]): EnjsFunction<T> {  //TODO  how useful is the genericity here?
   return function (noun) {
     for (let i = 0; i < opts.length; i++) {
       try {
@@ -81,8 +82,9 @@ const bucwut = function (opts: EnjsFunction[]): EnjsFunction {
   };
 };
 
+//TODO  alias for non-hooners
 //  buccen: like frond, but without the wrapper object
-const buccen = function (opts: frondOpt[]): EnjsFunction {
+function buccen<T>(opts: frondOpt<T>[]): EnjsFunction<T> {  //TODO  how useful is the genericity here?
   return function (noun) {
     if (!(noun instanceof Cell && noun.head.isAtom())) {
       throw new Error("buccen: noun not cell with tag head");
@@ -98,9 +100,9 @@ const buccen = function (opts: frondOpt[]): EnjsFunction {
 };
 
 //  (list *) -> any[]
-const array = function (item: EnjsFunction): (n: Noun) => Json[] {
+function array<T>(item: EnjsFunction<T>): EnjsFunction<T[]> {
   return function (noun) {
-    let a: Json[] = [];
+    let a: T[] = [];
     while (noun instanceof Cell) {
       a.push(item(noun.head));
       noun = noun.tail;
@@ -110,7 +112,7 @@ const array = function (item: EnjsFunction): (n: Noun) => Json[] {
 };
 
 //  (tree *) -> any[]
-const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
+function tree<T>(item: EnjsFunction<T>): EnjsFunction<T[]> {
   return function (noun) {
     if (noun instanceof Cell) {
       if (!(noun.tail instanceof Cell)) {
@@ -126,6 +128,25 @@ const tree = function (item: EnjsFunction): (n: Noun) => Json[] {
   };
 };
 
+function map<K extends PropertyKey, V>(key: EnjsFunction<K>, value: EnjsFunction<V>): EnjsFunction<Record<K,V>> {
+  return function (noun) {
+    return Object.fromEntries(tree((noun) => {
+      if (noun.isAtom()) {
+        throw new Error("map: malformed");
+      }
+      return [key(noun.head), value(noun.tail)];
+    })(noun));
+  };
+}
+
+function unit<T>(item: EnjsFunction<T>): EnjsFunction<T | null> {
+  return function (noun) {
+    if (noun.isAtom()) return null;
+    return item(noun.tail);
+  };
+}
+
+//REVIEW  gives reverse order string?
 const cord = function (noun: Noun): string {
   if (!(noun.isAtom())) {
     throw new Error(`cord: noun not atom ${noun.toString()}`);
@@ -170,6 +191,13 @@ const numbString = function (noun: Noun): string {
   return noun.number.toString();
 }
 
+const bigint = function (noun: Noun): bigint {
+  if (noun.isCell()) {
+    throw new Error("bigint: noun not atom");
+  }
+  return noun.number;
+}
+
 const loob = function (noun: Noun): boolean {
   return noun.loob();
 };
@@ -191,11 +219,14 @@ const enjs = {
   array,
   loob,
   tree,
+  map,
+  unit,
   cord,
   tape,
   numb,
   numb32,
   numbString,
+  bigint,
   path,
   buccen,
   bucwut,

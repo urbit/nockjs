@@ -134,6 +134,7 @@ class Atom {
       chars: string[] = [];
 
     for (let i = 0; i < bytes.length; ++i) {
+      //TODO  doesn't encode unicode chars properly?
       chars.push(String.fromCharCode(bytes[i]));
     }
     return chars.join("");

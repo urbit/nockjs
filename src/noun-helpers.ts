@@ -1,4 +1,4 @@
-import { enjs } from "./noun-enjs";
+import { EnjsFunction, enjs } from "./noun-enjs";
 import { dejs } from "./noun-dejs";
 import { Atom, Noun } from "./noun";
 import bits from "./bits";
@@ -6,10 +6,10 @@ const dwim = dejs.dwim;
 
 export type FaceMask = string | FaceMask[];
 export type FaceAxes = { [key: string]: Atom };
-const mask = ( face: FaceMask,
+function mask( face: FaceMask,
                axis: Atom = Atom.one,
                axes: FaceAxes = {}
-             ): FaceAxes => {
+             ): FaceAxes {
   if (typeof face === 'string') {
     if (face === '') return axes;
     axes[face] = axis;
@@ -25,12 +25,40 @@ const mask = ( face: FaceMask,
     }
   }
 }
-const grab = (axes: FaceAxes, noun: Noun, face: string): Noun => {
+function grab(axes: FaceAxes, noun: Noun, face: string): Noun {
   return noun.at(axes[face]);
 }
 
+function plan(face: FaceMask): (n: Noun)=>(f: string)=>Noun {
+  const axes = mask(face);
+  return (noun: Noun) => {
+    return (face: string) => {
+      return grab(axes, noun, face);
+    };
+  };
+}
+
+type resolved<T extends { [key: PropertyKey]: (...args: any) => any }> = {
+  [K in keyof T]: ReturnType<T[K]>
+}
+function destructure<T extends { [key: PropertyKey]: (arg: Noun) => any }>
+  (faces: FaceMask, cells: T): (n: Noun) => {
+    //NOTE  in-lining $resolved here makes type hint prettier
+    [K in keyof T]: ReturnType<T[K]>
+  } {
+  const p = plan(faces);
+  return function (noun: Noun): resolved<T> {
+    let o = {} as resolved<T>;
+    let g = p(noun);
+    for (const k in cells) {
+      o[k] = cells[k](g(k));
+    }
+    return o;
+  };
+}
+
 const experimental = {
-  mask, grab
+  mask, grab, plan, destructure
 }
 
 export { enjs, dejs, dwim, experimental };

@@ -3,7 +3,7 @@ import { putIn } from "./noun-std";
 import { Atom, Noun } from "./noun";
 import { EnjsFunction } from "./noun-enjs";
 
-function expectEnjs<T>(n: Noun, f: EnjsFunction, r: T) {
+function expectEnjs<T>(n: Noun, f: EnjsFunction<T>, r: T) {
   expect(f(n)).toEqual<T>(r);
 }
 
@@ -28,14 +28,14 @@ test('tuple', () => {
   // two-tuple with depth
   expectEnjs(
     dwim(1, 2, 3),
-    enjs.tuple([n, p]),
+    enjs.tuple<any>([n, p]),
     [1, [2, 3]]
   );
 
   // three-tuple with depth
   expectEnjs(
     dwim(1, [2, 3], 4),
-    enjs.tuple([n, p, n]),
+    enjs.tuple<any>([n, p, n]),
     [1, [2, 3], 4]
   );
 });
@@ -62,14 +62,14 @@ test('pairs', () => {
   // two-tuple with depth
   expectEnjs(
     dwim(1, 2, 3),
-    enjs.pairs([{ nom: 'a', get: n }, { nom: 'b', get: p }]),
+    enjs.pairs<any>([{ nom: 'a', get: n }, { nom: 'b', get: p }]),
     { a: 1, b: {x: 2, y: 3} }
   );
 
   // three-tuple with depth
   expectEnjs(
     dwim(1, [2, 3], 4),
-    enjs.pairs([{ nom: 'a', get: n }, { nom: 'b', get: p }, { nom: 'c', get: n }]),
+    enjs.pairs<any>([{ nom: 'a', get: n }, { nom: 'b', get: p }, { nom: 'c', get: n }]),
     { a: 1, b: { x: 2, y: 3 }, c: 4 }
   );
 });
